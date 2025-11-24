@@ -21,22 +21,58 @@ public class PlayerConnection implements Runnable { // implements Runnable -> pr
             System.out.println("[Server " + server.getServerId() + "] new client connected from "
                             + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
 
-            System.out.println("[Server " + server.getServerId() + "] received textual data from client: " + in.readLine());
+
+            System.out.println("[Server " + server.getServerId() + "] new client connected from "
+                    + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
 
 
-            try {
-                System.out.println(
-                        "[Server " + server.getServerId() + "] sleeping for 10 seconds to simulate a long operation");
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            // Lecture de la commande envoyé par le client
+
+            String line = in.readLine();
+
+            // Découper la commande
+            String[] parts = line.split(" ", 2);
+            String command = parts[0];
+            String argument = parts.length > 1 ? parts[1] : "";
+
+            System.out.println("[Server] received command: " + command);
+
+            switch (command.toUpperCase()) {
+                case "JOIN":
+                    System.out.println("[Server] Player joined: " + argument);
+                    out.write("WELCOME " + argument + "\n");
+                    out.flush();
+                    break;
+
+                case "HIT":
+                    System.out.println("[Server] Player requested HIT");
+                    out.write("OK HIT\n");
+                    out.flush();
+                    break;
+
+                case "BET":
+                    try {
+                        int betAmount = Integer.parseInt(argument); // conversion
+                        System.out.println("[Server] Player bet: " + betAmount);
+
+                        out.write("BET_ACCEPTED " + betAmount + "\n");
+                        out.flush();
+                    } catch (NumberFormatException e) {
+                        out.write("ERROR Invalid bet amount\n");
+                        out.flush();
+                    }
+                    break;
+                case "STAND":
+                    System.out.println("[Server] Player requested STAND");
+                    out.write("OK STAND\n");
+                    out.flush();
+                    break;
+
+                default:
+                    out.write("ERROR Unknown command\n");
+                    out.flush();
+                    break;
             }
-
-            System.out.println(
-                    "[Server " + server.getServerId() + "] sending response to client: " + server.getTextualData());
-
-            out.write(server.getTextualData() + "\n");
-            out.flush();
 
             System.out.println("[Server " + server.getServerId() + "] closing connection");
 
