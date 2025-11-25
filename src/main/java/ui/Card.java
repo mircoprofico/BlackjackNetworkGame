@@ -3,6 +3,7 @@ package ui;
 public class Card extends RenderableObject{
 
     public Card(int width, int height, char value, char color, char[] sides) {
+        super(0, 0, width, height);
         if(width<5 || height<5) throw new RuntimeException("The card should be at least 5x5");
         this.setWidth(width);
         this.setHeight(height);
@@ -10,6 +11,9 @@ public class Card extends RenderableObject{
         setBorder(image, sides);
         setNumbers(image, value, color);
         setStatus(image);
+    }
+    public Card(int width, int height, char value, char color) {
+        this(width, height, value, color, new char[]{'│','─'});
     }
 
 

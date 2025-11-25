@@ -12,7 +12,6 @@ public class CLIScreen {
         this.width = width;
         this.height = height;
         characters = new char[height][width];
-        //fillAll(' ');
     }
 
     public CLIScreen fillAll(char value){
@@ -48,7 +47,8 @@ public class CLIScreen {
 
         for(int x = startX; x < maxX; x++){
             for(int y = startY; y < maxY; y++){
-                setAt(x, y, object.at(x-startX,y-startY));
+                char val = object.at(x-startX,y-startY);
+                if(val != (char)0) setAt(x, y, object.at(x-startX,y-startY));
             }
         }
     }

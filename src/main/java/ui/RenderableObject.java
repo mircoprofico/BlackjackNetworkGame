@@ -7,6 +7,14 @@ public abstract class RenderableObject {
     private int y;
     private int width;
     private int height;
+
+    protected RenderableObject(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+
     protected boolean setStatus(char[][] status){
         this.status = status;
         return true;
@@ -26,15 +34,10 @@ public abstract class RenderableObject {
     public int yPos(){return y;}
 
     public int getWidth(){return width;}
-    public int getHeight(){
-        return height;
-    }
+    public int getHeight(){return height;}
     public void setWidth(int width) {this.width = Math.max(width, 0);}
     public void setHeight(int height) {this.height = Math.max(height, 0);}
-
-    public char at(int x, int y){
-        return status[y][x];
-    }
+    public char at(int x, int y){return status[y][x];}
 
     public String toString(){
         StringBuilder sb = new StringBuilder();
