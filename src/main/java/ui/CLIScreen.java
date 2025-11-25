@@ -2,8 +2,6 @@ package ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static java.lang.Thread.sleep;
-
 public class CLIScreen {
     private final int width;
     private final int height;
@@ -14,29 +12,13 @@ public class CLIScreen {
         this.width = width;
         this.height = height;
         characters = new char[height][width];
-        fillAll(' ');
+        //fillAll(' ');
     }
 
     public CLIScreen fillAll(char value){
         for(int i = 0; i < height; i++) {
             Arrays.fill(characters[i], value);
         }
-        return this;
-    }
-    public CLIScreen fillSide(boolean horizontal, boolean first, char border){
-        int max = (horizontal) ? width : height;
-        int secondVal = (first) ? 0 : ((horizontal) ? height : width)-1;
-        for(int i = 0; i < max; i++){
-            if(horizontal)characters[secondVal][i] =  border;
-            else characters[i][secondVal] = border;
-        }
-        return this;
-    }
-    public CLIScreen fillBorder(char value){
-        fillSide(true, true,value);
-        fillSide(false, true,value);
-        fillSide(true, false,value);
-        fillSide(false, false,value);
         return this;
     }
 
@@ -84,17 +66,5 @@ public class CLIScreen {
             sb.append("\n");
         }
         return sb.toString();
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        CLIScreen screen = new CLIScreen(80, 10);
-
-
-        Card d = new Card(9, 7, '2', 'A', new char[]{'|','━'});
-        Card d2 = new Card(9, 7, '3', 'B', new char[]{'|','━'});
-        Card d3 = new Card(9, 7, '4', 'C', new char[]{'|','━'});
-
-        screen.AddObject(d, 1, 1).AddObject(d2, 2, 2).AddObject(d3, 3, 3);
-        System.out.print(screen);
     }
 }
