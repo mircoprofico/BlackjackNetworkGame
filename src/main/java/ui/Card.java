@@ -11,6 +11,9 @@ public class Card extends RenderableObject{
         setNumbers(image, value, color);
         setStatus(image);
     }
+    public Card(int width, int height, char value, char color) {
+        this(width, height, value, color, new char[]{'│','─'});
+    }
 
 
     private void setNumbers(char[][] image, char value, char color){
