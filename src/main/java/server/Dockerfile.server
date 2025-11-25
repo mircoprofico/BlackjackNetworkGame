@@ -1,0 +1,15 @@
+# Use OpenJDK 17 slim image
+FROM eclipse-temurin:21-jdk
+
+
+# Set working directory inside container
+WORKDIR /app
+
+# Copy compiled classes
+COPY target/classes /app
+
+# Expose server port
+EXPOSE 1234
+
+# Command to run the server
+CMD ["java", "-cp", ".", "server.Server"]

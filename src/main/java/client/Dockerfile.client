@@ -1,0 +1,9 @@
+# Use OpenJDK 17 slim image
+FROM eclipse-temurin:21-jdk
+
+WORKDIR /app
+
+COPY target/classes /app
+
+# Command to run the client
+CMD ["java", "-cp", ".", "client.Client"]
