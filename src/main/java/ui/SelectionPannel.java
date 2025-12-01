@@ -2,9 +2,9 @@ package ui;
 
 public class SelectionPannel extends RenderableObject{
 
-    SelectionOption[] options;
-    // todo change current option with key press
-    int currentOption = 0;
+    private SelectionOption[] options;
+    private int currentOption = 0;
+    private char[] borders = new char[]{'░', '▓'};
     public SelectionPannel(int x, int y, int width, int height, String[] opt) {
         super(x, y, width, height);
         options = new SelectionOption[opt.length];
@@ -20,11 +20,26 @@ public class SelectionPannel extends RenderableObject{
 
             options[i] = new SelectionOption(xPos, 0, optionWidth, height, opt[i]);
             if (i == 0) {
-                options[i].changeBorderChar('▓');
+                options[i].changeBorderChar(borders[1]);
             }
             options[i].placeOption(computedStatus);
         }
         setStatus(computedStatus);
+    }
+
+    public void changeOption(int displacement){
+        options[currentOption].changeBorderChar(borders[0]);
+        currentOption += displacement;
+        currentOption %= options.length;
+        while(currentOption < 0){
+            currentOption += options.length;
+        }
+        options[currentOption].changeBorderChar(borders[1]);
+
+        char[][] computed = new char[getHeight()][getWidth()];
+        for (SelectionOption opt : options)
+            opt.placeOption(computed);
+        setStatus(computed);
     }
 
     class SelectionOption{
