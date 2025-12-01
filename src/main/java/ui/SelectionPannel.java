@@ -42,15 +42,19 @@ public class SelectionPannel extends RenderableObject{
         setStatus(computed);
     }
 
+    public String getCurrentOption(){return options[currentOption].getName();}
+
     class SelectionOption{
         char[][] status;
         int x;
         int y;
         char border = '░';
+        private String optName;
         protected SelectionOption(int x, int y, int width, int height, String name) {
             status = new char[height][width];
             this.x = x;
             this.y = y;
+            optName = name;
             recomputeBorder();
             // Word placement
             int wordYPlacement = height/2;
@@ -66,6 +70,10 @@ public class SelectionPannel extends RenderableObject{
                 }
             }
         }
+        public String getName(){
+            return optName;
+        }
+
         protected void changeBorderChar(char newChar){
             border = newChar;
             recomputeBorder();

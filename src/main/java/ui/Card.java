@@ -2,7 +2,7 @@ package ui;
 
 public class Card extends RenderableObject{
 
-    public Card(int width, int height, char value, char color, char[] sides) {
+    private Card(int width, int height, char value, char color, char[] sides) {
         super(0, 0, width, height);
         if(width<5 || height<5) throw new RuntimeException("The card should be at least 5x5");
         this.setWidth(width);
@@ -15,7 +15,6 @@ public class Card extends RenderableObject{
     public Card(int width, int height, char value, char color) {
         this(width, height, value, color, new char[]{'│','─'});
     }
-
 
     private void setNumbers(char[][] image, char value, char color){
         image[1][1] = value;
@@ -45,7 +44,7 @@ public class Card extends RenderableObject{
                 vertical = x % (width - 1) == 0;
 
                 corner = horizontal && vertical;
-                if(corner) image[y][x] = 'X';
+                if(corner) image[y][x] = '┼';
                 else if(vertical) image[y][x] = sides[0];
                 else if(horizontal) image[y][x] = sides[1];
                 else image[y][x] = ' ';

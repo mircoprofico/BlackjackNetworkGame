@@ -68,12 +68,15 @@ public class CLIScreen {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append("\033[7m");
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 sb.append(characters[y][x]);
             }
             sb.append("\r\n"); // \r needed since we are in raw mode
         }
+        sb.append("\033[m");
+
         return sb.toString();
     }
 }
