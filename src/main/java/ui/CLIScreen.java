@@ -26,6 +26,11 @@ public class CLIScreen {
         objects.add(object);
         return this;
     }
+    public CLIScreen AddObject(RenderableObject object){
+        objects.add(object);
+        return this;
+    }
+
     public CLIScreen RemoveObject(RenderableObject object){
         if(objects.contains(object)){
             objects.remove(object);
