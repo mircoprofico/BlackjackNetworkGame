@@ -50,49 +50,82 @@ public class CLIEngine {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         CLIEngine engine = new CLIEngine();
-        SelectionPannel sp = new SelectionPannel(20, 33, 40, 5, new String[]{"HIT", "STAND", "LEAVE"});
         engine.startEngine();
+
+        // For action selection
+        SelectionPannel sp = new SelectionPannel(20, 33, 40, 5, new String[]{"HIT", "STAND"});
+
+        // For bets
+        SelectionPannel betPanel = new SelectionPannel(20, 25, 30, 5, new String[]{"↑↑↑↑", "↓↓↓↓", "ACCEPT"});
+        RenderedText bets = new RenderedText(1, 1, 20, 2, " ");
+        int currentBet = 5;
+        bets.update("Current bet : " + currentBet + " $");
+        engine.add(bets);
+
+
+        SelectionPannel currentPanel = betPanel;
         engine.add(new Border(0, 0, 80, 40));
 
         int nextCardPlacement = 6;
-        engine.add(sp);
+        engine.add(betPanel);
         engine.add(new Card(13, 11, '4', '♡'), nextCardPlacement, nextCardPlacement);
-
+        boolean waitingForNext = false;
 
         while (RUNNING) {
             int read = System.in.read();
             char keyPressed = (char) read;
             if (read == -1) continue;
-
             if (keyPressed == ' ') {
                 engine.remove(sp); // first we hide the selection panel
-                switch (sp.getCurrentOption()){
+                switch (currentPanel.getCurrentOption()){
+                    // We are in the sp panel
                     case "HIT":
                         // todo envoyer message hit au serveur
-                        Card s = new Card(13, 11, '7', '♤');
+                        Card s = new Card(13, 11, '7', '♤'); //
                         nextCardPlacement += 2;
                         engine.add(s, nextCardPlacement, nextCardPlacement);
-                        // todo attendre réponse et agir en conséquence
                         break;
                     case "STAND":
                         // todo envoyer message stand au serveur
-                        // todo attendre réponse et agir en conséquence
+                        engine.remove(currentPanel);
+                        waitingForNext = true;
                         break;
-                    case "LEAVE":
-                        RUNNING = false;
+
+                    // We are in the betpanel
+                    case "ACCEPT":
+                        engine.remove(currentPanel);
+                        currentPanel = sp;
+                        engine.add(currentPanel);
+                        waitingForNext = true;
+                        break;
+
+                    case "↑↑↑↑":
+                        currentBet += 5;
+                        bets.update("Current bet : " + currentBet + " $");
+                        break;
+                    case "↓↓↓↓":
+
+                        currentBet -= (currentBet <= 5) ? 0 : 5;
+                        bets.update("Current bet : " + currentBet + " $");
                         break;
                 }
 
-                engine.add(sp); // we add the selection panel back, so that we can choose next move
             } else if (keyPressed == 'q') {
                 RUNNING = false; // quit the application
             } else if (keyPressed == 'a') {
-                sp.changeOption(-1);
+                currentPanel.changeOption(-1);
             } else if (keyPressed == 'd') {
-                sp.changeOption(1);
+                currentPanel.changeOption(1);
             }
 
             engine.update();
+            if(waitingForNext) {
+                // TODO REPL
+                // TODO RECEIVE CARD AFTER A HIT
+                // TODO PLAY WHEN TURN
+                // TODO receive info from game when other plays
+                waitingForNext = false;
+            }
         }
         engine.endEngine();
     }
