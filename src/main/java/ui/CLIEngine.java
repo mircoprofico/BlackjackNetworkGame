@@ -54,45 +54,47 @@ public class CLIEngine {
 
         // For action selection
         SelectionPannel sp = new SelectionPannel(20, 33, 40, 5, new String[]{"HIT", "STAND"});
-
+        int totalValue = 0;
         // For bets
         SelectionPannel betPanel = new SelectionPannel(20, 25, 30, 5, new String[]{"↑↑↑↑", "↓↓↓↓", "ACCEPT"});
         RenderedText bets = new RenderedText(1, 1, 20, 2, " ");
         int currentBet = 5;
         bets.update("Current bet : " + currentBet + " $");
         engine.add(bets);
+        engine.add(betPanel);
 
 
         SelectionPannel currentPanel = betPanel;
         engine.add(new Border(0, 0, 80, 40));
 
         int nextCardPlacement = 6;
-        engine.add(betPanel);
         engine.add(new Card(13, 11, '4', '♡'), nextCardPlacement, nextCardPlacement);
         boolean waitingForNext = false;
 
         while (RUNNING) {
+            waitingForNext = false;
             int read = System.in.read();
             char keyPressed = (char) read;
             if (read == -1) continue;
             if (keyPressed == ' ') {
-                engine.remove(sp); // first we hide the selection panel
                 switch (currentPanel.getCurrentOption()){
                     // We are in the sp panel
                     case "HIT":
                         // todo envoyer message hit au serveur
-                        Card s = new Card(13, 11, '7', '♤'); //
+                        Card s = new Card(13, 11, '7', '♤'); // todo creer carte avec réponse
                         nextCardPlacement += 2;
                         engine.add(s, nextCardPlacement, nextCardPlacement);
                         break;
                     case "STAND":
                         // todo envoyer message stand au serveur
+                        currentPanel.changeOption(-1);
                         engine.remove(currentPanel);
                         waitingForNext = true;
                         break;
 
                     // We are in the betpanel
                     case "ACCEPT":
+                        // todo envoyer le bet
                         engine.remove(currentPanel);
                         currentPanel = sp;
                         engine.add(currentPanel);
@@ -104,7 +106,6 @@ public class CLIEngine {
                         bets.update("Current bet : " + currentBet + " $");
                         break;
                     case "↓↓↓↓":
-
                         currentBet -= (currentBet <= 5) ? 0 : 5;
                         bets.update("Current bet : " + currentBet + " $");
                         break;
@@ -120,11 +121,9 @@ public class CLIEngine {
 
             engine.update();
             if(waitingForNext) {
-                // TODO REPL
-                // TODO RECEIVE CARD AFTER A HIT
-                // TODO PLAY WHEN TURN
+                // TODO PLAY WHEN TURN AFTER STAND
+                // TODO PLAY WHEN TURN AFTER BET
                 // TODO receive info from game when other plays
-                waitingForNext = false;
             }
         }
         engine.endEngine();
