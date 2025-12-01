@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class CLIEngine {
     private final CLIScreen screen;
-    private static boolean RUNNING = false;
+    public static boolean RUNNING = false;
 
     private final int screenWidth = 80;
     private final int screenHeight = 40;
