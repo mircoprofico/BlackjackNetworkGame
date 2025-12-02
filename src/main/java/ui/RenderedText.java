@@ -1,7 +1,7 @@
 package ui;
 
 public class RenderedText extends RenderableObject{
-    protected RenderedText(int x, int y, int width, int height, String text) {
+    public RenderedText(int x, int y, int width, int height, String text) {
         super(x, y, width, height);
         update(text);
     }

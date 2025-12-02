@@ -2,7 +2,7 @@ package ui;
 
 public class Border extends RenderableObject{
 
-    protected Border(int x, int y, int width, int height) {
+    public Border(int x, int y, int width, int height) {
         super(x, y, width, height);
         char[][] borderTab = new char[height][width];
         for(int i = 0; i < height; i++){
