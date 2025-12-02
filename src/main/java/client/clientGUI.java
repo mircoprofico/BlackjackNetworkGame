@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class clientGUI {
-    private static String ERROR_MESSAGE = "no error";
+    private static String END_MESSAGE = "Thanks for playing! Come back any time !";
     // Server configuration
     private static final String HOST = "localhost";
     private static final int PORT = 1234;
@@ -25,7 +25,7 @@ public class clientGUI {
      */
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Type a username : ");
+        System.out.print("Type a username : ");
         String username = sc.nextLine().trim();
 
         while (username.isEmpty()) {
@@ -33,7 +33,6 @@ public class clientGUI {
             username = sc.nextLine().trim();
         }
 
-        int money = -1;
 
         // Try-with-resources to automatically close socket, reader, writer, and scanner
         try (Socket socket = new Socket(HOST, PORT);
@@ -54,11 +53,12 @@ public class clientGUI {
             int totalValue = 0;
             // For bets
             SelectionPannel betPanel = new SelectionPannel(20, 25, 30, 5, new String[]{"↑↑↑↑", "↓↓↓↓", "ACCEPT"});
-            RenderedText bets = new RenderedText(1, 1, 20, 2, " ");
+            RenderedText bets = new RenderedText(1, 1, 30, 2, " ");
             int currentBet = 5;
             bets.update("Current bet : " + currentBet + " $");
             engine.add(bets);
             engine.add(betPanel);
+
 
 
             SelectionPannel currentPanel = betPanel;
@@ -66,21 +66,34 @@ public class clientGUI {
 
             int nextCardPlacement = 6;
             engine.add(new Card(13, 11, '4', '♡'), nextCardPlacement, nextCardPlacement);
-            boolean waitingForNext = false;
 
+            // Name rendering
+            int posStrX = (80-username.length())/2;
+            Border playerTagBorder = new Border(posStrX-1, 0, username.length()+2, 3);
+            RenderedText playerTag = new RenderedText(posStrX, 1, username.length(), 1, username);
+
+            engine.add(playerTagBorder);
+            engine.add(playerTag);
             out.write("JOIN " + username + "\n");
             out.flush();
+
+            // For the money currently having
+            int money = -1;
             String serverMessage = in.readLine();
             if (serverMessage.startsWith("WELCOME ")) {
                 money = Integer.parseInt(serverMessage.replace("WELCOME ", ""));
-                waitingForNext = true;
             }
+            RenderedText moneyText = new RenderedText(1, 2, 20, 1, "Current money : " + money + " $");
+            engine.add(moneyText);
 
             while (CLIEngine.RUNNING) {
-                waitingForNext = false;
                 int read = System.in.read();
                 char keyPressed = (char) read;
                 if (read == -1) continue;
+
+                /**
+                 * LOOP IF A KEY HAS BEEN PRESSED
+                 */
                 if (keyPressed == ' ') {
                     switch (currentPanel.getCurrentOption()){
                         // We are in the sp panel
@@ -94,15 +107,24 @@ public class clientGUI {
                                 engine.add(s, nextCardPlacement, nextCardPlacement);
                             } else {
                                 CLIEngine.RUNNING = false;
-                                ERROR_MESSAGE= in.readLine();
+                                END_MESSAGE = in.readLine();
 
                             }
                             break;
                         case "STAND":
                             currentPanel.changeOption(-1);
                             out.write("STAND\n");
-                            waitingForNext = true;
                             out.flush();
+
+                            String retMessage = in.readLine();
+                            if(retMessage.startsWith("OK STAND")){
+                                // todo Mettre un texte qui dit que les autres joueurs sont en train de jouer
+                                out.write("WAITING STAND\n");
+                                out.flush();
+                            } else {
+                                CLIEngine.RUNNING = false;
+                                END_MESSAGE = "Not authorized to send stand right now\n";
+                            }
                             break;
 
                         /**
@@ -111,15 +133,16 @@ public class clientGUI {
                         case "ACCEPT":
                             out.write("BET " + currentBet + "\n");
                             out.flush();
-                            String retMessage = in.readLine();
-                            if(retMessage.startsWith("OK BET")) {
+                            String msg = in.readLine();
+                            if(msg.startsWith("OK BET")) {
+                                money -= currentBet;
+                                moneyText.update("Current money : " + money + " $");
                                 engine.remove(currentPanel);
                                 currentPanel = sp;
                                 engine.add(currentPanel);
-                                waitingForNext = true;
                             } else {
                                 CLIEngine.RUNNING = false;
-                                ERROR_MESSAGE = retMessage;
+                                END_MESSAGE = msg;
                             }
                             break;
 
@@ -142,16 +165,13 @@ public class clientGUI {
                 } else if (keyPressed == 'd') {
                     currentPanel.changeOption(1);
                 }
-
+                /**
+                 * END OF LOOP IF A KEY HAS BEEN PRESSED
+                 */
                 engine.update();
-                if(waitingForNext) { // todo while we receive nothing
-                    // TODO BET WHEN TURN AFTER STAND, AFTER GETTING RESULT
-                    // TODO PLAY WHEN TURN AFTER BET
-                    // TODO receive info from game when other plays
-                }
             }
             engine.endEngine();
-            System.out.println(ERROR_MESSAGE);
+            System.out.println(END_MESSAGE);
 
         } catch (IOException e) {
             // Handle connection or I/O errors
