@@ -5,6 +5,7 @@ import ui.*;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class clientGUI {
@@ -18,7 +19,6 @@ public class clientGUI {
 
     // Message to send at the end of the game. Can be modified to handle errors
     private static String END_MESSAGE = "Thanks for playing! Come back any time !";
-
 
     /**
      * Main entry point for the client application.
@@ -70,8 +70,8 @@ public class clientGUI {
             int nextCardPlacement = 6;
 
             // Name rendering
-            int posStrX = (80-username.length())/2;
-            Border playerTagBorder = new Border(posStrX-1, 0, username.length()+2, 3);
+            int posStrX = (80 - username.length()) / 2;
+            Border playerTagBorder = new Border(posStrX - 1, 0, username.length() + 2, 3);
             RenderedText playerTag = new RenderedText(posStrX, 1, username.length(), 1, username);
 
             engine.add(playerTagBorder);
@@ -88,6 +88,12 @@ public class clientGUI {
             RenderedText moneyText = new RenderedText(1, 2, 20, 2, "Current money : " + money + " $");
             engine.add(moneyText);
 
+            /**
+             * Management of the score
+             */
+            ArrayList<String> hand = new ArrayList<>();
+            RenderedText totalText = new RenderedText(70, 40, 10, 1, "Total : " + 0);
+            engine.add(totalText);
             RenderedText lastResult = new RenderedText(60, 2, 19, 1, "Last round ");
             while (CLIEngine.RUNNING) {
                 int read = System.in.read();
@@ -98,34 +104,37 @@ public class clientGUI {
                  * LOOP IF A KEY HAS BEEN PRESSED
                  */
                 if (keyPressed == ' ') {
-                    switch (currentPanel.getCurrentOption()){
+                    switch (currentPanel.getCurrentOption()) {
                         // We are in the sp panel
                         case "HIT":
                             out.write("HIT\n");
                             out.flush();
                             String[] response = in.readLine().split(" ");
-                            if(response[0].equals("OK") && response[1].equals("HIT")){
+                            if (response[0].equals("OK") && response[1].equals("HIT")) {
                                 Card s = new Card(13, 11, response[2], response[3]);
                                 nextCardPlacement += 2;
                                 engine.add(s, nextCardPlacement, nextCardPlacement);
+                                // todo add card to hand and modify total
+                                int total = /*get total in hand*/ 0;
+                                totalText.update("Total : " + total);
                             } else {
                                 CLIEngine.RUNNING = false;
-                                END_MESSAGE = in.readLine();
-
+                                END_MESSAGE = "ERROR : Can't hit";
                             }
                             break;
+
                         case "STAND":
                             currentPanel.changeOption(-1);
                             out.write("STAND\n");
                             out.flush();
 
                             String retMessage = in.readLine();
-                            if(retMessage.startsWith("OK STAND")){
+                            if (retMessage.startsWith("OK STAND")) {
                                 out.write("WAITING STAND\n");
                                 out.flush();
                                 // todo text that say not your turn
                                 String[] result = in.readLine().split(" ");
-                                if(result[0].equals("RESULT")){
+                                if (result[0].equals("RESULT")) {
 
                                     switch (result[1]) {
                                         case "WIN":
@@ -145,6 +154,7 @@ public class clientGUI {
                                     money = Integer.parseInt(result[2]);
                                     engine.add(lastResult);
                                     moneyText.update("Current money : " + money + " $");
+                                    hand.clear();
                                 }
                             } else {
                                 CLIEngine.RUNNING = false;
@@ -159,13 +169,13 @@ public class clientGUI {
                             out.write("BET " + currentBet + "\n");
                             out.flush();
                             String msg = in.readLine();
-                            if(msg.startsWith("OK BET")) {
+                            if (msg.startsWith("OK BET")) {
                                 money -= currentBet;
                                 moneyText.update("Current money : " + money + " $");
                                 engine.remove(currentPanel);
                                 currentPanel = sp;
                                 String[] wakeUp = in.readLine().split(" ");
-                                if(wakeUp[0].equals("DEAL")) {
+                                if (wakeUp[0].equals("DEAL")) {
                                     engine.add(currentPanel);
                                     Card s = new Card(13, 11, wakeUp[1], wakeUp[2]);
                                     engine.add(s, nextCardPlacement, nextCardPlacement);
@@ -176,7 +186,7 @@ public class clientGUI {
 
                                 } else {
                                     CLIEngine.RUNNING = false;
-                                    END_MESSAGE = "Never received the DEAL keyword after the BET. instead : "+ wakeUp;
+                                    END_MESSAGE = "Never received the DEAL keyword after the BET. instead : " + wakeUp;
                                 }
                             } else {
                                 CLIEngine.RUNNING = false;
@@ -185,7 +195,7 @@ public class clientGUI {
                             break;
 
                         case "↑↑↑↑":
-                            if(currentBet + 5 < money) {
+                            if (currentBet + 5 < money) {
                                 currentBet += 5;
                                 bets.update("Current bet : " + currentBet + " $");
                             }

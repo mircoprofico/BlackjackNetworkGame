@@ -3,6 +3,7 @@ package server;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 /**
  * Handles a single player's connection to the server.
@@ -12,6 +13,9 @@ public class PlayerConnection implements Runnable {
     private final Socket socket;   // Socket associated with the connected client
     private final Server server;   // Reference to the main server instance
     private final GameManager gameManager;
+
+    private ArrayList<String> hand = new ArrayList<>();
+    private int betVal = 0;
     /**
      * Constructor for a new player connection.
      *
@@ -61,16 +65,24 @@ public class PlayerConnection implements Runnable {
                 String command = parts[0];
                 String argument = parts.length > 1 ? parts[1] : "";
 
+                /**
+                 *
+                 * ************ GAME LOOP ****************
+                 *
+                 */
                 // Process the command using a switch statement
                 switch (command.toUpperCase()) {
                     case "HIT":
                         System.out.println("[Server] Player requested HIT");
-                        // todo verifier si le joueur n'a pas dépassé 21
-                        // todo ajouter une carte sinon
-                        // si joueur
-                        String card = gameManager.requestCard();
-                        out.write("OK HIT " + card + "\n");
-                        out.flush();
+                        if(GameManager.totalValue(hand) >=21){
+                            out.write("ERROR can't hit when you're already at 21 or above\n");
+                            out.flush();
+                        } else {
+                            String card = gameManager.requestCard();
+                            hand.add(card);
+                            out.write("OK HIT " + card + "\n");
+                            out.flush();
+                        }
                         break;
 
                     case "BET":
@@ -80,12 +92,16 @@ public class PlayerConnection implements Runnable {
                             out.write("OK BET " + betAmount + "\n");
                             out.flush();
                             money -= betAmount;
+                            betVal = betAmount;
                             gameManager.placeBet(this);
                             gameManager.waitForMyTurn(this);
 
-                            out.write("DEAL "+ gameManager.requestCard() + " " + gameManager.requestCard()+"\n");
+                            String c1 = gameManager.requestCard();
+                            String c2 = gameManager.requestCard();
+                            out.write("DEAL "+ c1 + " " + c2+"\n");
                             out.flush();
-                            //todo ajouter 2 cartes
+                            hand.add(c1);
+                            hand.add(c2);
                         } else {
                             out.write("ERROR : BET " + betAmount + " while player only" +
                                     "has "+ money+"\n");
@@ -95,9 +111,21 @@ public class PlayerConnection implements Runnable {
                     case "STAND":
                         gameManager.nextPlayer(); // passer au joueur suivant
                         gameManager.waitForMyTurn(this);
-                        // todo implémenter logique de fin
-                        out.write("RESULT WIN 20\n");
-                        out.flush();
+                        //todo Wait for the croupier to play
+                        int totalDealer = 17;
+
+                        if(totalDealer>GameManager.totalValue(hand)) {
+                            out.write("RESULT LOOSE " + money + "\n");
+                            out.flush();
+                        } else if(totalDealer<GameManager.totalValue(hand)) {
+                            money += betVal * 2;
+                            out.write("RESULT WIN " + money + "\n");
+                            out.flush();
+                        } else {
+                            money += betVal;
+                            out.write("RESULT TIE " + money + "\n");
+                            out.flush();
+                        }
                         break;
                     default:
                         // Unknown command received

@@ -17,6 +17,32 @@ public class GameManager {
     private boolean roundInProgress = false;
     private int currentPlayerIndex = -1;
 
+    public static int totalValue(ArrayList<String> deck){
+        int sum = 0;
+        int aces = 0;
+        for(String card : deck){
+            String nextVal = card.split(" ")[0];
+            switch(nextVal){
+                case "K":
+                case "Q":
+                case "J":
+                    sum += 10;
+                    break;
+                case "A":
+                    aces++;
+                    sum += 11;
+                    break;
+                default:
+                    sum += Integer.parseInt(nextVal);
+            }
+            while (aces > 0 && sum > 21){
+                aces--;
+                sum -= 10;
+            }
+        }
+        return sum;
+    }
+
     private String[] createDeck(int numberOfPacks){
         String[] deck = new String[numberOfPacks * colors.length * values.length];
         for(int i = 0; i < colors.length; i++){
