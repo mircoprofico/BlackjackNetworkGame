@@ -6,7 +6,7 @@
 ## JOIN
 
 ```
-CLIENT                                    SERVEUR
+CLIENT                                    SERVER
   |                                          |
   |---- JOIN <username> -------------------->|
   |                                          |
@@ -19,7 +19,7 @@ CLIENT                                    SERVEUR
 ## BET
 
 ```
-CLIENT                                    SERVEUR
+CLIENT                                    SERVER
   |                                          |
   |---- BET <amount> ----------------------->|
   |                                          |
@@ -30,10 +30,10 @@ CLIENT                                    SERVEUR
 Error if not in the game: :
 
 ```
-CLIENT                                    SERVEUR
-  |---- BET 100 --------------------------->|
-  |                                          |
-  |<--- ERROR NOT_IN_GAME --------------|
+CLIENT                                    SERVER
+  |---- BET 100 ----------------------------->|
+  |                                           |
+  |<--- ERROR NOT_IN_GAME --------------------|
 ```
 
 ---
@@ -41,7 +41,7 @@ CLIENT                                    SERVEUR
 ## HIT (request card)
 
 ```
-CLIENT                                    SERVEUR
+CLIENT                                    SERVER
   |                                          |
   |---- HIT -------------------------------->|
   |                                          |
@@ -52,7 +52,7 @@ CLIENT                                    SERVEUR
 If the player exceeds 21 :
 
 ```
-CLIENT                                    SERVEUR
+CLIENT                                    SERVER
   |---- HIT -------------------------------->|
   |                                          |
   |<--- BUST --------------------------------|
@@ -66,7 +66,7 @@ In Blackjack, “BUST” means that the player has exceeded 21 points.
 ## STAND (refuse to receive other cards)
 
 ```
-CLIENT                                    SERVEUR
+CLIENT                                    SERVER
   |                                          |
   |---- STAND ------------------------------>|
   |                                          |
@@ -81,7 +81,7 @@ CLIENT                                    SERVEUR
 ## QUIT 
 
 ```
-CLIENT                                    SERVEUR
+CLIENT                                    SERVER
   |                                          |
   |---- QUIT ------------------------------->|
   |                                          |
@@ -101,7 +101,7 @@ CLIENT → SERVER
   STAND
   QUIT
 
-SERVEUR → CLIENT
+SERVER → CLIENT
   WELCOME <username>
   BET_OK <amount>
   CARD <rank> <suit>
@@ -116,7 +116,7 @@ SERVEUR → CLIENT
 # Complete diagram of a round (JOIN → BET → HIT → STAND)
 
 ```
-CLIENT                                    SERVEUR
+CLIENT                                    SERVER
   |                                          |
   |---- JOIN Mirco ------------------------->|
   |<--- WELCOME Mirco -----------------------|
