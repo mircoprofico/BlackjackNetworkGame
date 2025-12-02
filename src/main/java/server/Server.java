@@ -12,10 +12,11 @@ public class Server {
 
     private static final int PORT = 1234; // Port number where the server will listen for connections
     private static final int SERVER_ID = (int) (Math.random() * 1000000); // Random server ID used for logging purposes
-
+    private final GameManager gameManager = new GameManager();
     // Textual data to send to clients (can be used for testing or welcome message)
     private static final String TEXTUAL_DATA = "👋 from Croupier " + SERVER_ID;
 
+    public final int BASE_MONEY = 50;
     /**
      * Getter for the server ID.
      * Used by PlayerConnection for logging.
@@ -47,7 +48,7 @@ public class Server {
                         clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
 
                 // Start a new thread to handle this client
-                new Thread(new PlayerConnection(clientSocket, this)).start();
+                new Thread(new PlayerConnection(clientSocket, this, gameManager)).start();
             }
 
         } catch (IOException e) {

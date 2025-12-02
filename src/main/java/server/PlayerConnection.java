@@ -11,16 +11,17 @@ import java.nio.charset.StandardCharsets;
 public class PlayerConnection implements Runnable {
     private final Socket socket;   // Socket associated with the connected client
     private final Server server;   // Reference to the main server instance
-
+    private final GameManager gameManager;
     /**
      * Constructor for a new player connection.
      *
      * @param clientSocket the socket representing the client connection
      * @param server       reference to the main server
      */
-    public PlayerConnection(Socket clientSocket, Server server) {
+    public PlayerConnection(Socket clientSocket, Server server, GameManager gameManager) {
         this.socket = clientSocket;
         this.server = server;
+        this.gameManager = gameManager;
     }
 
     /**
@@ -29,6 +30,7 @@ public class PlayerConnection implements Runnable {
      */
     @Override
     public void run() {
+        int money = server.BASE_MONEY;
         try (socket; // Use try-with-resources to auto-close the socket
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
              BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8))) {
@@ -38,7 +40,18 @@ public class PlayerConnection implements Runnable {
 
             out.write("[Server] " + server.getTextualData() + "\n");
             out.flush();
+            String[] joinMessage = in.readLine().split(" ");
 
+            if (joinMessage.length>1 && joinMessage[0].equals("JOIN")) {
+                gameManager.joinGame(this);
+                System.out.println("[Server] Player joined: " + joinMessage[1]);
+                out.write("WELCOME " + server.BASE_MONEY + "\n");
+                out.flush();
+
+            } else {
+                out.write("ERROR : JOIN <username> to join the game\n");
+            }
+            out.flush();
 
             // Read commands sent by the client in a loop
             String line;
@@ -50,37 +63,42 @@ public class PlayerConnection implements Runnable {
 
                 // Process the command using a switch statement
                 switch (command.toUpperCase()) {
-                    case "JOIN":
-                        System.out.println("[Server] Player joined: " + argument);
-                        out.write("WELCOME " + argument + "\n");
-                        out.flush();
-                        break;
-
                     case "HIT":
                         System.out.println("[Server] Player requested HIT");
-                        out.write("OK HIT\n");
+                        // todo verifier si le joueur n'a pas dépassé 21
+                        // todo ajouter une carte sinon
+                        // si joueur
+                        String card = gameManager.requestCard();
+                        out.write("OK HIT " + card + "\n");
                         out.flush();
                         break;
 
                     case "BET":
-                        try {
-                            int betAmount = Integer.parseInt(argument); // Convert string to integer
-                            System.out.println("[Server] Player bet: " + betAmount);
+                        System.out.println("[Server] Player requested BET");
+                        int betAmount = Integer.parseInt(argument);
+                        if(betAmount<=money) {
+                            out.write("OK BET " + betAmount + "\n");
+                            out.flush();
+                            money -= betAmount;
+                            gameManager.placeBet(this);
+                            gameManager.waitForMyTurn(this);
 
-                            out.write("BET_ACCEPTED " + betAmount + "\n");
+                            out.write("DEAL "+ gameManager.requestCard() + " " + gameManager.requestCard()+"\n");
                             out.flush();
-                        } catch (NumberFormatException e) {
-                            out.write("ERROR Invalid bet amount\n");
-                            out.flush();
+                            //todo ajouter 2 cartes
+                        } else {
+                            out.write("ERROR : BET " + betAmount + " while player only" +
+                                    "has "+ money+"\n");
                         }
                         break;
 
                     case "STAND":
-                        System.out.println("[Server] Player requested STAND");
-                        out.write("OK STAND\n");
+                        gameManager.nextPlayer(); // passer au joueur suivant
+                        gameManager.waitForMyTurn(this);
+                        // todo implémenter logique de fin
+                        out.write("RESULT WIN 20\n");
                         out.flush();
                         break;
-
                     default:
                         // Unknown command received
                         out.write("ERROR Unknown command\n");
@@ -94,6 +112,8 @@ public class PlayerConnection implements Runnable {
         } catch (IOException e) {
             // Handle exceptions such as client disconnects or I/O errors
             System.err.println("[Server " + server.getServerId() + "] exception: " + e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }

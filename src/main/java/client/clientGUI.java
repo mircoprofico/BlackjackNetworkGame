@@ -76,10 +76,10 @@ public class clientGUI {
 
             engine.add(playerTagBorder);
             engine.add(playerTag);
+
+            // JOIN the game, done only once
             out.write("JOIN " + username + "\n");
             out.flush();
-
-            // For the money currently having
             int money = -1;
             String serverMessage = in.readLine();
             if (serverMessage.startsWith("WELCOME ")) {
@@ -103,9 +103,9 @@ public class clientGUI {
                         case "HIT":
                             out.write("HIT\n");
                             out.flush();
-                            String response = in.readLine();
-                            if(response.startsWith("OK HIT")){
-                                Card s = new Card(13, 11, response.charAt(7), response.charAt(9));
+                            String[] response = in.readLine().split(" ");
+                            if(response[0].equals("OK") && response[1].equals("HIT")){
+                                Card s = new Card(13, 11, response[2], response[3]);
                                 nextCardPlacement += 2;
                                 engine.add(s, nextCardPlacement, nextCardPlacement);
                             } else {
@@ -140,7 +140,7 @@ public class clientGUI {
                                         default:
                                             CLIEngine.RUNNING = false;
                                             END_MESSAGE = "Only possible message after a result is WIN, " +
-                                                          "LOOSE or TIE, but got " + result[1];
+                                                    "LOOSE or TIE, but got " + result[1];
                                     }
                                     money = Integer.parseInt(result[2]);
                                     engine.add(lastResult);
@@ -164,14 +164,20 @@ public class clientGUI {
                                 moneyText.update("Current money : " + money + " $");
                                 engine.remove(currentPanel);
                                 currentPanel = sp;
-                                out.write("WAITING BET\n");
-                                out.flush();
-                                if(in.readLine().startsWith("YOUR TURN")) {
+                                String[] wakeUp = in.readLine().split(" ");
+                                if(wakeUp[0].equals("DEAL")) {
                                     engine.add(currentPanel);
-                                } else {
-                                    throw new RuntimeException("at this point, should receive \"YOUR TURN\"");
-                                }
+                                    Card s = new Card(13, 11, wakeUp[1], wakeUp[2]);
+                                    engine.add(s, nextCardPlacement, nextCardPlacement);
+                                    nextCardPlacement += 2;
+                                    Card s2 = new Card(13, 11, wakeUp[3], wakeUp[4]);
+                                    engine.add(s2, nextCardPlacement, nextCardPlacement);
+                                    nextCardPlacement += 2;
 
+                                } else {
+                                    CLIEngine.RUNNING = false;
+                                    END_MESSAGE = "Never received the DEAL keyword after the BET. instead : "+ wakeUp;
+                                }
                             } else {
                                 CLIEngine.RUNNING = false;
                                 END_MESSAGE = msg;
