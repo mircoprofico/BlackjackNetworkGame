@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class clientGUI {
-
+    private static String ERROR_MESSAGE = "no error";
     // Server configuration
     private static final String HOST = "localhost";
     private static final int PORT = 1234;
@@ -24,6 +24,16 @@ public class clientGUI {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Type a username : ");
+        String username = sc.nextLine().trim();
+
+        while (username.isEmpty()) {
+            System.out.println("Username can't be empty Type a valid username: ");
+            username = sc.nextLine().trim();
+        }
+
+        int money = -1;
 
         // Try-with-resources to automatically close socket, reader, writer, and scanner
         try (Socket socket = new Socket(HOST, PORT);
@@ -58,6 +68,14 @@ public class clientGUI {
             engine.add(new Card(13, 11, '4', '♡'), nextCardPlacement, nextCardPlacement);
             boolean waitingForNext = false;
 
+            out.write("JOIN " + username + "\n");
+            out.flush();
+            String serverMessage = in.readLine();
+            if (serverMessage.startsWith("WELCOME ")) {
+                money = Integer.parseInt(serverMessage.replace("WELCOME ", ""));
+                waitingForNext = true;
+            }
+
             while (CLIEngine.RUNNING) {
                 waitingForNext = false;
                 int read = System.in.read();
@@ -75,42 +93,41 @@ public class clientGUI {
                                 nextCardPlacement += 2;
                                 engine.add(s, nextCardPlacement, nextCardPlacement);
                             } else {
-                                // todo throw error can't hit
-                                throw new RuntimeException();
+                                CLIEngine.RUNNING = false;
+                                ERROR_MESSAGE= in.readLine();
+
                             }
                             break;
                         case "STAND":
                             currentPanel.changeOption(-1);
                             out.write("STAND\n");
+                            waitingForNext = true;
                             out.flush();
-                            if(in.readLine().startsWith("OK HIT")) {
-                                engine.remove(currentPanel);
-                                waitingForNext = true;
-                            } else {
-                                // todo throw error can't stand
-                                throw new RuntimeException();
-                            }
                             break;
 
-                        // We are in the betpanel
+                        /**
+                         * This is where we check for the bet panel
+                         */
                         case "ACCEPT":
                             out.write("BET " + currentBet + "\n");
                             out.flush();
-                            if(in.readLine().startsWith("OK HIT")) {
+                            String retMessage = in.readLine();
+                            if(retMessage.startsWith("OK BET")) {
                                 engine.remove(currentPanel);
                                 currentPanel = sp;
                                 engine.add(currentPanel);
                                 waitingForNext = true;
                             } else {
-                                // todo throw error can't bet that
-                                throw new RuntimeException();
+                                CLIEngine.RUNNING = false;
+                                ERROR_MESSAGE = retMessage;
                             }
-
                             break;
 
                         case "↑↑↑↑":
-                            currentBet += 5;
-                            bets.update("Current bet : " + currentBet + " $");
+                            if(currentBet + 5 < money) {
+                                currentBet += 5;
+                                bets.update("Current bet : " + currentBet + " $");
+                            }
                             break;
                         case "↓↓↓↓":
                             currentBet -= (currentBet <= 5) ? 0 : 5;
@@ -127,13 +144,14 @@ public class clientGUI {
                 }
 
                 engine.update();
-                if(waitingForNext) {
-                    // TODO PLAY WHEN TURN AFTER STAND
+                if(waitingForNext) { // todo while we receive nothing
+                    // TODO BET WHEN TURN AFTER STAND, AFTER GETTING RESULT
                     // TODO PLAY WHEN TURN AFTER BET
                     // TODO receive info from game when other plays
                 }
             }
             engine.endEngine();
+            System.out.println(ERROR_MESSAGE);
 
         } catch (IOException e) {
             // Handle connection or I/O errors
