@@ -15,7 +15,6 @@ public class clientGUI {
 
     // Random client ID for logging purposes
     private static final int CLIENT_ID = (int) (Math.random() * 1000000);
-    private static final String TEXTUAL_DATA = "👋 from Player " + CLIENT_ID;
 
     // Message to send at the end of the game. Can be modified to handle errors
     private static String END_MESSAGE = "Thanks for playing! Come back any time !";
@@ -24,9 +23,7 @@ public class clientGUI {
         int a = 0;
         for(String card : cards) {
             switch (card) {
-                case "J":
-                case "Q":
-                case "K":
+                case "J": case "Q": case "K":
                     tot +=10;
                     break;
                 case "A":
@@ -55,6 +52,7 @@ public class clientGUI {
         Scanner sc = new Scanner(System.in);
         System.out.print("Type a username : ");
         String username = sc.nextLine().trim();
+        ArrayList<Card> renderedCards = new ArrayList<>();
         while (username.isEmpty()) {
             System.out.println("Username can't be empty Type a valid username: ");
             username = sc.nextLine().trim();
@@ -90,7 +88,8 @@ public class clientGUI {
             SelectionPannel currentPanel = betPanel;
             engine.add(new Border(0, 0, 80, 40));
 
-            int nextCardPlacement = 6;
+            final int baseCardPlacement = 6;
+            int nextCardPlacement = baseCardPlacement;
 
             // Name rendering
             int posStrX = (80 - username.length()) / 2;
@@ -117,7 +116,8 @@ public class clientGUI {
             ArrayList<String> hand = new ArrayList<>();
             RenderedText totalText = new RenderedText(60, 30, 12, 1, "Total : " + 0);
             engine.add(totalText);
-            RenderedText lastResult = new RenderedText(60, 2, 19, 1, "Last round ");
+            RenderedText lastResult = new RenderedText(2, 38, 60, 2, "Last round ");
+            engine.add(lastResult);
             while (CLIEngine.RUNNING) {
                 int read = System.in.read();
                 char keyPressed = (char) read;
@@ -135,7 +135,7 @@ public class clientGUI {
                             String[] response = in.readLine().split(" ");
                             if (response[0].equals("OK") && response[1].equals("HIT")) {
                                 Card s = new Card(13, 11, response[2], response[3]);
-
+                                renderedCards.add(s);
                                 engine.add(s, nextCardPlacement, nextCardPlacement);
                                 nextCardPlacement += 2;
                                 hand.add(response[2]);
@@ -163,6 +163,16 @@ public class clientGUI {
                         case "STAND":
                             currentPanel.changeOption(-1);
                             STAND_CALL(out, in, lastResult, moneyText, hand);
+                            for(Card card : renderedCards){
+                                engine.remove(card);
+                            }
+                            nextCardPlacement = baseCardPlacement;
+                            renderedCards.clear();
+
+                            engine.remove(currentPanel);
+                            currentPanel = betPanel;
+                            engine.add(currentPanel);
+
                             engine.update();
 
                             break;
@@ -183,10 +193,12 @@ public class clientGUI {
                                 if (wakeUp[0].equals("DEAL")) {
                                     engine.add(currentPanel);
                                     Card s = new Card(13, 11, wakeUp[1], wakeUp[2]);
+                                    renderedCards.add(s);
                                     engine.add(s, nextCardPlacement, nextCardPlacement);
                                     hand.add(wakeUp[1]);
                                     nextCardPlacement += 2;
                                     Card s2 = new Card(13, 11, wakeUp[3], wakeUp[4]);
+                                    renderedCards.add(s2);
                                     engine.add(s2, nextCardPlacement, nextCardPlacement);
                                     hand.add(wakeUp[3]);
                                     nextCardPlacement += 2;
@@ -251,8 +263,6 @@ public class clientGUI {
     {
         out.write("STAND\n");
         out.flush();
-
-        //String retMsg = in.readLine();
 
         String[] result = in.readLine().split(" ");
         if(!result[0].equals("RESULT")) {

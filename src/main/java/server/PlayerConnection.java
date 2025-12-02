@@ -14,7 +14,7 @@ public class PlayerConnection implements Runnable {
     private final Server server;   // Reference to the main server instance
     private final GameManager gameManager;
 
-    private ArrayList<String> hand = new ArrayList<>();
+    private final ArrayList<String> hand = new ArrayList<>();
     private int betVal = 0;
     /**
      * Constructor for a new player connection.
