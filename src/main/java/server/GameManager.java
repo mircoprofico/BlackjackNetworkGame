@@ -10,6 +10,7 @@ public class GameManager {
     private final int numberOfPackInDeck = 3;
     private final int maxCard = numberOfPackInDeck * 52;
     private int currentCardIndex = 0;
+    private final Dealer dealer = new Dealer();
     String[] colors = {"H", "D", "S", "C"}; // Heart, Diamond, Spade, Clove
     String[] values = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
     private final String[] cards = shuffleDeck(createDeck(numberOfPackInDeck));
@@ -65,6 +66,7 @@ public class GameManager {
         roundInProgress = true;
         currentPlayerIndex = 0;
         bet.clear();
+        dealer.pickCard();
         notifyAll();
     }
 
@@ -88,15 +90,24 @@ public class GameManager {
         players.add(p);
     }
 
+    public synchronized int getDealerScore() {
+        return totalValue(dealer.getCards());
+    }
+
 
     public synchronized void endRound() {
         roundInProgress = false;
-        // todo logique croupier
+
         System.out.println("Round ended");
+        dealer.playLogic();
+        System.out.println("Dealer made a score of " + getDealerScore());
+        dealer.endRound();
+
+
+        for (PlayerConnection p : players) {p.reset();}
         notifyAll();
-        for(PlayerConnection p : toRemove){
-            players.remove(p);
-        }
+        for(PlayerConnection p : toRemove) {players.remove(p);}
+        toRemove.clear();
 
     }
 
@@ -119,14 +130,18 @@ public class GameManager {
     }
 
     public synchronized void nextPlayer() {
+        if(players.isEmpty()) return;
+
         currentPlayerIndex++;
 
         if (currentPlayerIndex >= players.size()) {
             endRound();
+            currentPlayerIndex = -1;
         }
 
         notifyAll();
     }
+    boolean isPlaying(){return roundInProgress;}
 
     public synchronized void removePlayer(PlayerConnection p) {
         int index = players.indexOf(p);
@@ -137,6 +152,27 @@ public class GameManager {
         // Si on retire celui qui jouait
         if (wasCurrent) {
             currentPlayerIndex++;
+        }
+    }
+
+    class Dealer{
+        ArrayList<String> cards = new ArrayList<>();
+
+        String pickCard(){
+            String c = requestCard();
+            cards.add(c);
+            return c;
+        }
+        void endRound(){
+            roundInProgress = false;
+            cards.clear();
+        }
+        ArrayList<String> getCards(){return cards;}
+        int playLogic(){
+            while(totalValue(cards)<17){
+                pickCard();
+            }
+            return totalValue(cards);
         }
     }
 }

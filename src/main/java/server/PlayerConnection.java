@@ -57,6 +57,11 @@ public class PlayerConnection implements Runnable {
             }
             out.flush();
 
+            /**
+             *
+             * ************ GAME LOOP ****************
+             *
+             */
             // Read commands sent by the client in a loop
             String line;
             while ((line = in.readLine()) != null) {
@@ -64,12 +69,6 @@ public class PlayerConnection implements Runnable {
                 String[] parts = line.split(" ", 2);
                 String command = parts[0];
                 String argument = parts.length > 1 ? parts[1] : "";
-
-                /**
-                 *
-                 * ************ GAME LOOP ****************
-                 *
-                 */
                 // Process the command using a switch statement
                 switch (command.toUpperCase()) {
                     case "HIT":
@@ -93,11 +92,10 @@ public class PlayerConnection implements Runnable {
                             out.flush();
                             money -= betAmount;
                             betVal = betAmount;
-                            gameManager.placeBet(this);
-                            gameManager.waitForMyTurn(this);
-
                             String c1 = gameManager.requestCard();
                             String c2 = gameManager.requestCard();
+                            gameManager.placeBet(this);
+                            gameManager.waitForMyTurn(this);
                             out.write("DEAL "+ c1 + " " + c2+"\n");
                             out.flush();
                             hand.add(c1);
@@ -110,21 +108,29 @@ public class PlayerConnection implements Runnable {
 
                     case "STAND":
                         gameManager.nextPlayer(); // passer au joueur suivant
-                        gameManager.waitForMyTurn(this);
-                        //todo Wait for the croupier to play
-                        int totalDealer = 17;
-
-                        if(totalDealer>GameManager.totalValue(hand)) {
-                            out.write("RESULT LOOSE " + money + "\n");
-                            out.flush();
-                        } else if(totalDealer<GameManager.totalValue(hand)) {
-                            money += betVal * 2;
-                            out.write("RESULT WIN " + money + "\n");
-                            out.flush();
-                        } else {
-                            money += betVal;
-                            out.write("RESULT TIE " + money + "\n");
-                            out.flush();
+                        System.out.println("[Server] next player!");
+                        if(gameManager.isPlaying()){
+                            gameManager.waitForMyTurn(this);
+                            System.out.println(" There is still players\n");
+                        }
+                        if(!gameManager.isPlaying()){
+                            int totalDealer = gameManager.getDealerScore();
+                            int totalPlayer = GameManager.totalValue(hand);
+                            totalPlayer = (totalPlayer>21)? -1 : totalPlayer; // if we overshoot, we loose either way
+                            System.out.println("[Server] Sending result");
+                            if(totalDealer>totalPlayer) {
+                                out.write("RESULT LOOSE " + money + "\n");
+                                out.flush();
+                            } else if(totalDealer<totalPlayer) {
+                                money += betVal * 2;
+                                out.write("RESULT WIN " + money + "\n");
+                                out.flush();
+                            } else {
+                                money += betVal;
+                                out.write("RESULT TIE " + money + "\n");
+                                out.flush();
+                            }
+                            System.out.println("[Server] Result sent");
                         }
                         break;
                     default:
@@ -143,5 +149,10 @@ public class PlayerConnection implements Runnable {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void reset() {
+        hand.clear();
+        betVal = 0;
     }
 }
