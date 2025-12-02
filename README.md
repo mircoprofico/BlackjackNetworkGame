@@ -8,7 +8,7 @@ Players can join or leave at any time, place bets, and play their turns independ
 The server manages the game state, ensures consistency, and handles the dealer logic.
 
 ### Application Protocol
-The application protocol is explained [here](src/main/java/docs/protocol.md).
+The application protocol is explained [here](src/main/java/docs/protocol.md) and the diagram [here](src/main/java/docs/diagram_protocol.md).
 
 ---
 
