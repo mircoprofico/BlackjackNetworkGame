@@ -144,6 +144,16 @@ public class clientGUI {
                                     totalText.update("BUSTED :( ");
                                     engine.update();
                                     STAND_CALL(out, in, lastResult, moneyText, hand);
+                                    for(Card card : renderedCards){
+                                        engine.remove(card);
+                                    }
+                                    nextCardPlacement = baseCardPlacement;
+                                    renderedCards.clear();
+
+                                    engine.remove(currentPanel);
+                                    currentPanel = betPanel;
+                                    engine.add(currentPanel);
+
                                     engine.update();
                                 } else {
                                     totalText.update("Total : " + total);
@@ -151,7 +161,18 @@ public class clientGUI {
                                         totalText.update("Total : " + total);
                                         engine.update();
                                         STAND_CALL(out, in, lastResult, moneyText, hand);
+                                        for(Card card : renderedCards){
+                                            engine.remove(card);
+                                        }
+                                        nextCardPlacement = baseCardPlacement;
+                                        renderedCards.clear();
+
+                                        engine.remove(currentPanel);
+                                        currentPanel = betPanel;
+                                        engine.add(currentPanel);
+
                                         engine.update();
+
                                     }
                                 }
                             } else {
@@ -206,8 +227,17 @@ public class clientGUI {
                                     if(total==21){
                                         totalText.update("BLACK JACK !");
                                         STAND_CALL(out, in, lastResult, moneyText, hand);
-                                        engine.update();
+                                        for(Card card : renderedCards){
+                                            engine.remove(card);
+                                        }
+                                        nextCardPlacement = baseCardPlacement;
+                                        renderedCards.clear();
 
+                                        engine.remove(currentPanel);
+                                        currentPanel = betPanel;
+                                        engine.add(currentPanel);
+
+                                        engine.update();
                                     } else {
                                         totalText.update("Total : " + total);
                                     }

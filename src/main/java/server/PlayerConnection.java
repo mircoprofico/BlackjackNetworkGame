@@ -13,7 +13,7 @@ public class PlayerConnection implements Runnable {
     private final Socket socket;   // Socket associated with the connected client
     private final Server server;   // Reference to the main server instance
     private final GameManager gameManager;
-
+    private String name;
     private final ArrayList<String> hand = new ArrayList<>();
     private int betVal = 0;
     /**
@@ -49,6 +49,7 @@ public class PlayerConnection implements Runnable {
             if (joinMessage.length>1 && joinMessage[0].equals("JOIN")) {
                 gameManager.joinGame(this);
                 System.out.println("[Server] Player joined: " + joinMessage[1]);
+                name = joinMessage[1];
                 out.write("WELCOME " + server.BASE_MONEY + "\n");
                 out.flush();
 
@@ -107,6 +108,8 @@ public class PlayerConnection implements Runnable {
                         break;
 
                     case "STAND":
+                        int totalPlayer = GameManager.totalValue(hand);
+
                         gameManager.nextPlayer(); // passer au joueur suivant
                         System.out.println("[Server] next player!");
                         if(gameManager.isPlaying()){
@@ -115,7 +118,6 @@ public class PlayerConnection implements Runnable {
                         }
                         if(!gameManager.isPlaying()){
                             int totalDealer = gameManager.getDealerScore();
-                            int totalPlayer = GameManager.totalValue(hand);
                             totalPlayer = (totalPlayer>21)? -1 : totalPlayer; // if we overshoot, we loose either way
                             System.out.println("[Server] Sending result");
                             if(totalDealer>totalPlayer) {
@@ -123,6 +125,7 @@ public class PlayerConnection implements Runnable {
                                 out.flush();
                             } else if(totalDealer<totalPlayer) {
                                 money += betVal * 2;
+                                System.out.println("[Server] " + betVal + "\n");
                                 out.write("RESULT WIN " + money + "\n");
                                 out.flush();
                             } else {
@@ -131,6 +134,7 @@ public class PlayerConnection implements Runnable {
                                 out.flush();
                             }
                             System.out.println("[Server] Result sent");
+                            betVal = 0;
                         }
                         break;
                     default:
@@ -148,11 +152,20 @@ public class PlayerConnection implements Runnable {
             System.err.println("[Server " + server.getServerId() + "] exception: " + e);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        } finally{
+            handleDisconnect();
         }
+    }
+
+    private void handleDisconnect(){
+        try{
+            socket.close();
+        } catch (IOException e) {}
+        gameManager.removePlayer(this);
+        System.out.println("[Server] player "+ name + " has left the game");
     }
 
     public void reset() {
         hand.clear();
-        betVal = 0;
     }
 }

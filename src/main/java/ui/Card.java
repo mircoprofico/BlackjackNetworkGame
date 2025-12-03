@@ -18,7 +18,22 @@ public class Card extends RenderableObject{
 
     private void setNumbers(char[][] image, String value, String color){
 
-        char[] values = (value + color).toCharArray();
+        String realColor = "?";
+        switch(color){
+            case "H":
+                realColor = "♡";
+                break;
+            case "D":
+                realColor = "♢";
+                break;
+            case "C":
+                realColor = "♧";
+                break;
+            case "S":
+                realColor = "♤";
+                break;
+        }
+        char[] values = (value + realColor).toCharArray();
         int x = 1;
         int y = 1;
 
