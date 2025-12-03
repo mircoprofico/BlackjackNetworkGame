@@ -12,43 +12,48 @@ The application protocol is explained [here](src/main/java/docs/protocol.md) and
 
 ---
 
-## Running the Server and Client
+# How to Launch the Game
 
-### Running the Server
-The server can be run using Docker or directly via Java.
-
-**With Docker:**
+Once the project has been built, you can start both the server and the client directly from the command line.
+Navigate into the project folder:
 
 ```bash
-# Build the Docker image
-docker build -t blackjack-network-game .
-
-# Run the server on port 1234
-docker run -p 1234:1234 blackjack-network-game server -p 1234
-````
-
-**Directly with Java:**
-
-```bash
-java -jar target/blackjack-network-game-1.0-SNAPSHOT.jar server -p 1234
+cd BlackJackNetworkGame
 ```
 
-### Running the Client
+## Starting the Server
 
-The client can connect to the server via Docker or Java.
-
-**With Docker:**
+Use the executable JAR located in the `target/` directory:
 
 ```bash
-docker run -it blackjack-network-game client -h <server-ip> -p 1234
+java -jar target/BlackJack-1.0-SNAPSHOT.jar server
 ```
 
-**Directly with Java:**
+By default, the server listens on its standard port.
+If you want to choose a specific port:
 
 ```bash
-java -jar target/blackjack-network-game-1.0-SNAPSHOT.jar client -h <server-ip> -p 1234
+java -jar target/BlackJack-1.0-SNAPSHOT.jar server -p 5000
+# or
+java -jar target/BlackJack-1.0-SNAPSHOT.jar server --port 5000
 ```
 
+
+## Starting a Client
+
+You can open as many clients as you want. Each instance connects to a server:
+
+```bash
+java -jar target/BlackJack-1.0-SNAPSHOT.jar client
+```
+
+To connect to a specific host and port:
+
+```bash
+java -jar target/BlackJack-1.0-SNAPSHOT.jar client -h 127.0.0.1 -p 5000
+# or
+java -jar target/BlackJack-1.0-SNAPSHOT.jar client --host 127.0.0.1 --port 5000
+```
 
 ---
 
