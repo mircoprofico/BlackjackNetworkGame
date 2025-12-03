@@ -1,12 +1,20 @@
-# Stage 1: Build with Maven
+# Stage 1: Build Maven
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
+
 COPY pom.xml .
 COPY src ./src
-RUN mvn package -DskipTests
 
-# Stage 2: Image finale
+RUN mvn clean package -DskipTests
+
+# Stage 2: Runtime
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
-COPY --from=build /app/target/classes ./classes
-CMD ["java", "-cp", "./classes", "client.Client"]
+
+COPY --from=build /app/target/*-shaded.jar app.jar
+
+# Démarre le client automatiquement
+ENTRYPOINT ["java", "-jar", "app.jar", "client", "-p", "1234", "-h", "blackjack-server"]
+
+# Pour pouvoir taper dans le client
+ENV TERM=xterm

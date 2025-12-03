@@ -10,11 +10,20 @@ import java.net.Socket;
  */
 public class Server {
 
-    private static final int PORT = 1234; // Port number where the server will listen for connections
-    private static final int SERVER_ID = (int) (Math.random() * 1000000); // Random server ID used for logging purposes
+    private final int port;  // Port number where the server listens
+    private final int serverId = (int) (Math.random() * 1000000); // Random ID used for logging
 
-    // Textual data to send to clients (can be used for testing or welcome message)
-    private static final String TEXTUAL_DATA = "👋 from Croupier " + SERVER_ID;
+    // Textual data to send to clients (can be used for testing or as welcome message)
+    private final String textualData = "👋 from Croupier " + serverId;
+
+    /**
+     * Constructor allowing dynamic port configuration.
+     *
+     * @param port server listening port
+     */
+    public Server(int port) {
+        this.port = port;
+    }
 
     /**
      * Getter for the server ID.
@@ -22,46 +31,42 @@ public class Server {
      *
      * @return the server ID
      */
-    public int getServerId() { return SERVER_ID; }
+    public int getServerId() {
+        return serverId;
+    }
 
     /**
-     * Getter for textual data.
-     * Used by PlayerConnection to send a response to clients.
+     * Getter for textual data sent to clients.
      *
      * @return the textual message
      */
-    public String getTextualData() { return TEXTUAL_DATA; }
+    public String getTextualData() {
+        return textualData;
+    }
 
     /**
-     * Starts the server: listens for client connections and handles each connection in a separate thread.
+     * Starts the server: listens for client connections and handles
+     * each connection in a separate PlayerConnection thread.
      */
     public void start() {
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
 
-            System.out.println("[Server " + SERVER_ID + "] starting with id " + SERVER_ID + " listening on port " + PORT);
+            System.out.println("[Server " + serverId + "] starting on port " + port);
 
             // Main loop: accept clients indefinitely
             while (true) {
                 Socket clientSocket = serverSocket.accept(); // blocks until a client connects
-                System.out.println("[Server " + SERVER_ID + "] new client connected: " +
+
+                System.out.println("[Server " + serverId + "] new client connected: " +
                         clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
 
-                // Start a new thread to handle this client
+                // Start a new thread to handle the client
                 new Thread(new PlayerConnection(clientSocket, this)).start();
             }
 
         } catch (IOException e) {
             // Handle server socket errors
-            System.out.println("[Server " + SERVER_ID + "] exception: " + e);
+            System.out.println("[Server " + serverId + "] exception: " + e);
         }
-    }
-
-    /**
-     * Main entry point for the server program.
-     *
-     * @param args command-line arguments (not used)
-     */
-    public static void main(String[] args) {
-        new Server().start();
     }
 }
