@@ -16,6 +16,10 @@ public class clientGUI {
     // Random client ID for logging purposes
     private static final int CLIENT_ID = (int) (Math.random() * 1000000);
 
+    // UI constants
+    final static int BASE_CARD_PLACEMENT = 6;
+
+
     // Message to send at the end of the game. Can be modified to handle errors
     private static String END_MESSAGE = "Thanks for playing! Come back any time !";
     private static int getTotal(ArrayList<String> cards) {
@@ -47,7 +51,6 @@ public class clientGUI {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
-
         // get player name
         Scanner sc = new Scanner(System.in);
         System.out.print("Type a username : ");
@@ -68,45 +71,62 @@ public class clientGUI {
             String hello = in.readLine();
             System.out.println(hello);
 
+            /**
+             * UI : From Here, we create every ui component necessary for the graphical application.
+             * The application works using a custom engine.
+             */
             // Engine creation and addition of objects
             CLIEngine engine = new CLIEngine();
             engine.startEngine();
 
-            // For action selection
-            SelectionPannel sp = new SelectionPannel(20, 33, 40, 5, new String[]{"HIT", "STAND"});
-            int totalValue = 0;
-
-            // For bets
-            SelectionPannel betPanel = new SelectionPannel(20, 25, 30, 5, new String[]{"↑↑↑↑", "↓↓↓↓", "ACCEPT"});
-            RenderedText bets = new RenderedText(1, 1, 30, 2, " ");
-            int currentBet = 5;
-            bets.update("Current bet : " + currentBet + " $");
-            engine.add(bets);
-            engine.add(betPanel);
-
-
-            SelectionPannel currentPanel = betPanel;
-            engine.add(new Border(0, 0, 80, 40));
-
-            final int baseCardPlacement = 6;
-            int nextCardPlacement = baseCardPlacement;
-
-            // Name rendering
             int posStrX = (80 - username.length()) / 2;
+
+            SelectionPannel sp = new SelectionPannel(20, 33, 40, 5, new String[]{"HIT", "STAND"});
+            SelectionPannel betPanel = new SelectionPannel(20, 25, 30, 5, new String[]{"↑↑↑↑", "↓↓↓↓", "ACCEPT"});
+            SelectionPannel currentPanel = betPanel;
+            RenderedText bets = new RenderedText(1, 1, 30, 2, " ");
+
+            RenderedText commands = new RenderedText(60, 1, 18, 2, "-----COMMANDS-----");
+            RenderedText commands1 = new RenderedText(60, 2, 18, 2, "a     :   <-");
+            RenderedText commands2 = new RenderedText(60, 3, 18, 2, "d     :   ->");
+            RenderedText commands3 = new RenderedText(60, 4, 18, 2, "space : confirm");
+            Border commandBorder = new Border(58, 0, 21, 6);
+
             Border playerTagBorder = new Border(posStrX - 1, 0, username.length() + 2, 3);
             RenderedText playerTag = new RenderedText(posStrX, 1, username.length(), 1, username);
 
+            int currentBet = 5;
+            bets.update("Current bet : " + currentBet + " $");
+
+            engine.add(commandBorder);
+            engine.add(commands);
+            engine.add(commands1);
+            engine.add(commands2);
+            engine.add(commands3);
+            engine.add(bets);
+            engine.add(betPanel);
+            engine.add(new Border(0, 0, 80, 40));
             engine.add(playerTagBorder);
             engine.add(playerTag);
 
-            // JOIN the game, done only once
+            int nextCardPlacement = BASE_CARD_PLACEMENT;
+
+            /**
+             * JOIN MESSAGE : To connect to the game, the user has to send join, followed by its username. He will
+             * Be given it's balance
+             *
+             */
             out.write("JOIN " + username + "\n");
             out.flush();
-            int money = -1;
+            int money = 0;
             String serverMessage = in.readLine();
             if (serverMessage.startsWith("WELCOME ")) {
                 money = Integer.parseInt(serverMessage.replace("WELCOME ", ""));
+            } else {
+                CLIEngine.RUNNING = false;
+                END_MESSAGE = "Received a message other than WELCOME after a join. Aborting...";
             }
+
             RenderedText moneyText = new RenderedText(1, 2, 20, 2, "Current money : " + money + " $");
             engine.add(moneyText);
 
@@ -116,19 +136,22 @@ public class clientGUI {
             ArrayList<String> hand = new ArrayList<>();
             RenderedText totalText = new RenderedText(60, 30, 12, 1, "Total : " + 0);
             engine.add(totalText);
-            RenderedText lastResult = new RenderedText(2, 38, 60, 2, "Last round ");
+            RenderedText lastResult = new RenderedText(2, 38, 60, 2, "");
             engine.add(lastResult);
+
+
+            /**
+             * SIMULATION LOOP
+             */
             while (CLIEngine.RUNNING) {
                 int read = System.in.read();
                 char keyPressed = (char) read;
                 if (read == -1) continue;
-
-                /**
-                 * LOOP IF A KEY HAS BEEN PRESSED
-                 */
                 if (keyPressed == ' ') {
                     switch (currentPanel.getCurrentOption()) {
-                        // We are in the sp panel
+                        /**
+                         * These cases shall only be available if the current pannel is the selection panel
+                         */
                         case "HIT":
                             out.write("HIT\n");
                             out.flush();
@@ -147,7 +170,7 @@ public class clientGUI {
                                     for(Card card : renderedCards){
                                         engine.remove(card);
                                     }
-                                    nextCardPlacement = baseCardPlacement;
+                                    nextCardPlacement = BASE_CARD_PLACEMENT;
                                     renderedCards.clear();
 
                                     engine.remove(currentPanel);
@@ -164,20 +187,17 @@ public class clientGUI {
                                         for(Card card : renderedCards){
                                             engine.remove(card);
                                         }
-                                        nextCardPlacement = baseCardPlacement;
+                                        nextCardPlacement = BASE_CARD_PLACEMENT;
                                         renderedCards.clear();
-
                                         engine.remove(currentPanel);
                                         currentPanel = betPanel;
                                         engine.add(currentPanel);
-
                                         engine.update();
-
                                     }
                                 }
                             } else {
                                 CLIEngine.RUNNING = false;
-                                END_MESSAGE = "ERROR : Can't hit";
+                                END_MESSAGE = response[0];
                             }
                             break;
 
@@ -187,19 +207,16 @@ public class clientGUI {
                             for(Card card : renderedCards){
                                 engine.remove(card);
                             }
-                            nextCardPlacement = baseCardPlacement;
+                            nextCardPlacement = BASE_CARD_PLACEMENT;
                             renderedCards.clear();
-
                             engine.remove(currentPanel);
                             currentPanel = betPanel;
                             engine.add(currentPanel);
-
                             engine.update();
-
                             break;
 
                         /**
-                         * This is where we check for the bet panel
+                         * These cases shall only be available if the current pannel is the bet panel
                          */
                         case "ACCEPT":
                             out.write("BET " + currentBet + "\n");
@@ -207,6 +224,7 @@ public class clientGUI {
                             String msg = in.readLine();
                             if (msg.startsWith("OK BET")) {
                                 money -= currentBet;
+                                currentBet = 5;
                                 moneyText.update("Current money : " + money + " $");
                                 engine.remove(currentPanel);
                                 currentPanel = sp;
@@ -230,7 +248,7 @@ public class clientGUI {
                                         for(Card card : renderedCards){
                                             engine.remove(card);
                                         }
-                                        nextCardPlacement = baseCardPlacement;
+                                        nextCardPlacement = BASE_CARD_PLACEMENT;
                                         renderedCards.clear();
 
                                         engine.remove(currentPanel);
@@ -252,7 +270,7 @@ public class clientGUI {
                             break;
 
                         case "↑↑↑↑":
-                            if (currentBet + 5 < money) {
+                            if (currentBet + 5 <= money) {
                                 currentBet += 5;
                                 bets.update("Current bet : " + currentBet + " $");
                             }
@@ -277,19 +295,16 @@ public class clientGUI {
             }
             engine.endEngine();
             System.out.println(END_MESSAGE);
-
         } catch (IOException e) {
-            // Handle connection or I/O errors
             System.out.println("[Client " + CLIENT_ID + "] exception: " + e);
         }
     }
-    private static void STAND_CALL(
-            BufferedWriter out,
-            BufferedReader in,
-            RenderedText lastResult,
-            RenderedText moneyText,
-            ArrayList<String> hand
-    ) throws IOException
+
+    private static void STAND_CALL(BufferedWriter out,
+                                   BufferedReader in,
+                                   RenderedText lastResult,
+                                   RenderedText moneyText,
+                                   ArrayList<String> hand ) throws IOException
     {
         out.write("STAND\n");
         out.flush();
@@ -302,14 +317,18 @@ public class clientGUI {
         } else {
             switch (result[1]) {
                 case "WIN":
-                    lastResult.update("Last round won! new balance is " + result[2]);
+                    lastResult.update("Last round won! new balance is " + result[2] + " (dealer score was "+ result[3] +")");
                     break;
                 case "LOOSE":
-                    lastResult.update("Last round lost! new balance is " + result[2]);
+                    lastResult.update("Last round lost! new balance is " + result[2]  + " (dealer score was "+ result[3] +")");
+                    if(result[2].equals("0")){
+                        END_MESSAGE = "You run out of money :( you were kicked from the casino!";
+                        CLIEngine.RUNNING = false;
+                    }
                     break;
 
                 case "TIE":
-                    lastResult.update("Last round tied! new balance is " + result[2]);
+                    lastResult.update("Last round tied! new balance is " + result[2]  + " (dealer score was "+ result[3] +")");
                     break;
 
                 default:

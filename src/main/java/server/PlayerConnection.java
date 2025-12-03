@@ -75,7 +75,8 @@ public class PlayerConnection implements Runnable {
                     case "HIT":
                         System.out.println("[Server] Player requested HIT");
                         if(GameManager.totalValue(hand) >=21){
-                            out.write("ERROR can't hit when you're already at 21 or above\n");
+                            out.write("p1" +
+                                    "\n");
                             out.flush();
                         } else {
                             String card = gameManager.requestCard();
@@ -120,17 +121,18 @@ public class PlayerConnection implements Runnable {
                             int totalDealer = gameManager.getDealerScore();
                             totalPlayer = (totalPlayer>21)? -1 : totalPlayer; // if we overshoot, we loose either way
                             System.out.println("[Server] Sending result");
+                            int dealerScore = gameManager.getDealerScore();
                             if(totalDealer>totalPlayer) {
-                                out.write("RESULT LOOSE " + money + "\n");
+                                out.write("RESULT LOOSE " + money +  " " + dealerScore +"\n");
                                 out.flush();
                             } else if(totalDealer<totalPlayer) {
                                 money += betVal * 2;
                                 System.out.println("[Server] " + betVal + "\n");
-                                out.write("RESULT WIN " + money + "\n");
+                                out.write("RESULT WIN " + money + " " + dealerScore +"\n");
                                 out.flush();
                             } else {
                                 money += betVal;
-                                out.write("RESULT TIE " + money + "\n");
+                                out.write("RESULT TIE " + money +  " " + dealerScore +"\n");
                                 out.flush();
                             }
                             System.out.println("[Server] Result sent");
@@ -151,8 +153,9 @@ public class PlayerConnection implements Runnable {
             // Handle exceptions such as client disconnects or I/O errors
             System.err.println("[Server " + server.getServerId() + "] exception: " + e);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
-        } finally{
+        } finally {
             handleDisconnect();
         }
     }

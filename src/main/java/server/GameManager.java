@@ -69,6 +69,9 @@
             currentPlayerIndex = 0;
             dealerTotal = 0;
             bet.clear();
+            for(PlayerConnection pc : players){
+                pc.reset();
+            }
             dealer.pickCard();
             notifyAll();
         }
@@ -153,12 +156,22 @@
             if(index<0) return;
 
             boolean wasCurrent = (index == currentPlayerIndex);
-            toRemove.add(p);
+            players.remove(p);
+            bet.remove(p);
 
-            if (wasCurrent) {
-                currentPlayerIndex++;
-                notifyAll();
+            p.reset();
+            if(players.isEmpty()) {
+                currentPlayerIndex = -1;
+                roundInProgress = false;
+                roundFinished = true;
+            } else {
+                if (wasCurrent) {
+                    currentPlayerIndex %= players.size();
+                } else if(index<currentPlayerIndex){
+                    currentPlayerIndex--;
+                }
             }
+            notifyAll();
         }
 
         class Dealer{
