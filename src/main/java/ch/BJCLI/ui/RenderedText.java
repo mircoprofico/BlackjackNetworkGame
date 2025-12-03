@@ -1,4 +1,4 @@
-package ui;
+package ch.BJCLI.ui;
 
 public class RenderedText extends RenderableObject{
     public RenderedText(int x, int y, int width, int height, String text) {

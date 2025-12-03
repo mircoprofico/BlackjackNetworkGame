@@ -1,4 +1,4 @@
-package client;
+package ch.BJCLI.client;
 
 import java.io.*;
 import java.net.Socket;
@@ -11,13 +11,13 @@ public class Client {
     private static final String HOST = "server";
     private static final int PORT = 1234;
 
-    // Random client ID for logging purposes
+    // Random ch.BJCLI.client ID for logging purposes
     private static final int CLIENT_ID = (int) (Math.random() * 1000000);
     private static final String TEXTUAL_DATA = "👋 from Player " + CLIENT_ID;
 
     /**
-     * Main entry point for the client application.
-     * Connects to the server and allows the user to send commands interactively.
+     * ch.BJCLI.Main entry point for the ch.BJCLI.client application.
+     * Connects to the ch.BJCLI.server and allows the user to send commands interactively.
      *
      * @param args command-line arguments (not used)
      */
@@ -35,27 +35,27 @@ public class Client {
 
             System.out.println("[Client " + CLIENT_ID + "] connected");
 
-            // read server welcome message
+            // read ch.BJCLI.server welcome message
             String hello = in.readLine();
             System.out.println(hello);
 
 
-            // Main loop: read user input and send commands to the server
+            // ch.BJCLI.Main loop: read user input and send commands to the ch.BJCLI.server
             while (true) {
                 System.out.print("> ");
                 String command = scanner.nextLine();
 
-                // Exit the client if the user types QUIT
+                // Exit the ch.BJCLI.client if the user types QUIT
                 if (command.equalsIgnoreCase("QUIT")) {
                     System.out.println("[Client] closing...");
                     break;
                 }
 
-                // Send the command to the server
+                // Send the command to the ch.BJCLI.server
                 out.write(command + "\n");
                 out.flush();
 
-                // Wait for the server response and print it
+                // Wait for the ch.BJCLI.server response and print it
                 String response = in.readLine();
                 System.out.println("[Server] " + response);
             }

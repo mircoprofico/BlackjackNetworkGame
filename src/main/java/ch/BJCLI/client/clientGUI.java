@@ -1,6 +1,7 @@
-package client;
+package ch.BJCLI.client;
 
-import ui.*;
+import ch.BJCLI.ui.*;
+import picocli.CommandLine;
 
 import java.io.*;
 import java.net.Socket;
@@ -8,17 +9,25 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class clientGUI {
-    // Server configuration
-    private static final String HOST = "localhost";
-    private static final int PORT = 1234;
 
-    // Random client ID for logging purposes
+
+@CommandLine.Command(name = "client", mixinStandardHelpOptions = true, version = "1.0",
+        description = "Launch a new instance of clientGUI, will prompt for name")
+public class clientGUI implements Runnable{
+    // Server configuration
+
+    @CommandLine.Option(names = {"-h", "--host"}, description = "The server host name")
+    private String HOST = "localhost";
+
+    @CommandLine.Option(names = {"-p", "--port"}, description = "The port to connect to")
+    private int PORT = 1234;
+
+    // Random ch.BJCLI.client ID for logging purposes
     private static final int CLIENT_ID = (int) (Math.random() * 1000000);
 
     // UI constants
     final static int BASE_CARD_PLACEMENT = 6;
-
+    private static int money;
 
     // Message to send at the end of the game. Can be modified to handle errors
     private static String END_MESSAGE = "Thanks for playing! Come back any time !";
@@ -44,13 +53,9 @@ public class clientGUI {
         }
         return tot;
     }
-    /**
-     * Main entry point for the client application.
-     * Connects to the server and allows the user to send commands interactively.
-     *
-     * @param args command-line arguments (not used)
-     */
-    public static void main(String[] args) {
+
+    @Override
+    public void run() {
         // get player name
         Scanner sc = new Scanner(System.in);
         System.out.print("Type a username : ");
@@ -69,10 +74,10 @@ public class clientGUI {
                      new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
              Scanner scanner = new Scanner(System.in)) {
             String hello = in.readLine();
-            System.out.println(hello);
+            //System.out.println(hello);
 
             /**
-             * UI : From Here, we create every ui component necessary for the graphical application.
+             * UI : From Here, we create every ch.BJCLI.ui component necessary for the graphical application.
              * The application works using a custom engine.
              */
             // Engine creation and addition of objects
@@ -118,7 +123,7 @@ public class clientGUI {
              */
             out.write("JOIN " + username + "\n");
             out.flush();
-            int money = 0;
+            money = 0;
             String serverMessage = in.readLine();
             if (serverMessage.startsWith("WELCOME ")) {
                 money = Integer.parseInt(serverMessage.replace("WELCOME ", ""));
@@ -230,6 +235,7 @@ public class clientGUI {
                                 currentBet = 5;
                                 moneyText.update("Current money : " + money + " $");
                                 engine.remove(currentPanel);
+                                engine.update();
                                 currentPanel = sp;
                                 String[] wakeUp = in.readLine().split(" ");
                                 if (wakeUp[0].equals("DEAL")) {
@@ -341,7 +347,7 @@ public class clientGUI {
                             "LOOSE or TIE, but got " + result[1];
             }
 
-            int money = Integer.parseInt(result[2]);
+            money = Integer.parseInt(result[2]);
             moneyText.update("Current money : " + money + " $");
             hand.clear();
         }

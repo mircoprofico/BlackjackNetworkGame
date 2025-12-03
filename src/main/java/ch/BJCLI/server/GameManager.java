@@ -1,4 +1,4 @@
-    package server;
+    package ch.BJCLI.server;
     import java.util.*;
 
     public class GameManager {

@@ -1,4 +1,4 @@
-package ui;
+package ch.BJCLI.ui;
 
 public class Border extends RenderableObject{
 
