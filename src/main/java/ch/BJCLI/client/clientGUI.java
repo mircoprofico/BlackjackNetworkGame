@@ -27,7 +27,7 @@ public class clientGUI implements Runnable{
 
     // UI constants
     final static int BASE_CARD_PLACEMENT = 6;
-
+    private static int money;
 
     // Message to send at the end of the game. Can be modified to handle errors
     private static String END_MESSAGE = "Thanks for playing! Come back any time !";
@@ -74,7 +74,7 @@ public class clientGUI implements Runnable{
                      new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
              Scanner scanner = new Scanner(System.in)) {
             String hello = in.readLine();
-            System.out.println(hello);
+            //System.out.println(hello);
 
             /**
              * UI : From Here, we create every ch.BJCLI.ui component necessary for the graphical application.
@@ -123,7 +123,7 @@ public class clientGUI implements Runnable{
              */
             out.write("JOIN " + username + "\n");
             out.flush();
-            int money = 0;
+            money = 0;
             String serverMessage = in.readLine();
             if (serverMessage.startsWith("WELCOME ")) {
                 money = Integer.parseInt(serverMessage.replace("WELCOME ", ""));
@@ -235,6 +235,7 @@ public class clientGUI implements Runnable{
                                 currentBet = 5;
                                 moneyText.update("Current money : " + money + " $");
                                 engine.remove(currentPanel);
+                                engine.update();
                                 currentPanel = sp;
                                 String[] wakeUp = in.readLine().split(" ");
                                 if (wakeUp[0].equals("DEAL")) {
@@ -346,7 +347,7 @@ public class clientGUI implements Runnable{
                             "LOOSE or TIE, but got " + result[1];
             }
 
-            int money = Integer.parseInt(result[2]);
+            money = Integer.parseInt(result[2]);
             moneyText.update("Current money : " + money + " $");
             hand.clear();
         }
