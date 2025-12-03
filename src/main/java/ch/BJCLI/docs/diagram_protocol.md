@@ -10,7 +10,7 @@ CLIENT                                    SERVER
   |                                          |
   |---- JOIN <username> -------------------->|
   |                                          |
-  |<--- WELCOME <username> ------------------|
+  |<--- WELCOME <balance> -------------------|
   |                                          |
 ```
 
@@ -21,9 +21,10 @@ CLIENT                                    SERVER
 ```
 CLIENT                                    SERVER
   |                                          |
-  |---- BET <amount> ----------------------->|
+  |---- BET <value> ------------------------>|
   |                                          |
-  |<--- BET_OK <amount> ---------------------|
+  |<--- OK BET  -----------------------------|
+  |<--- DEAL C1 C2  -------------------------|
   |                                          |
 ```
 
@@ -45,7 +46,7 @@ CLIENT                                    SERVER
   |                                          |
   |---- HIT -------------------------------->|
   |                                          |
-  |<--- CARD <rank> <suit> ------------------|
+  |<--- OK HIT <rank> <suit> ------------------|
   |                                          |
 ```
 
@@ -70,9 +71,8 @@ CLIENT                                    SERVER
   |                                          |
   |---- STAND ------------------------------>|
   |                                          |
-  |<--- STAND_OK ----------------------------|
   |                                          |
-  |<--- RESULT <WIN|LOSE|PUSH> --------------|
+  |<--- RESULT <WIN|LOSE|TIE> ---------------|
   |                                          |
 ```
 
@@ -102,11 +102,13 @@ CLIENT → SERVER
   QUIT
 
 SERVER → CLIENT
-  WELCOME <username>
-  BET_OK <amount>
-  CARD <rank> <suit>
+  WELCOME <value>
+  OK BET
+  DEAL C1 C2
+  OK HIT <rank> <suit>
+  UPDATE <game_state>
   BUST
-  RESULT <WIN|LOSE|PUSH>
+  RESULT <WIN|LOSE|TIE>
   ERROR <code> <message>
   GOODBYE
 ```
@@ -118,19 +120,24 @@ SERVER → CLIENT
 ```
 CLIENT                                    SERVER
   |                                          |
-  |---- JOIN Mirco ------------------------->|
-  |<--- WELCOME Mirco -----------------------|
-  |                                          |
-  |---- BET 50 ----------------------------->|
-  |<--- BET_OK 50 ---------------------------|
-  |                                          |
-  |---- HIT -------------------------------->|
-  |<--- CARD 7 HEARTS -----------------------|
+  |---- JOIN Alan -------------------------->|
+  |<--- WELCOME 50 --------------------------|
+
+  |---- BET 10 ----------------------------->|
+  |<--- OK BET  -----------------------------|
+  |<--- DEAL C1 C2  -------------------------|
   |                                          |
   |---- HIT -------------------------------->|
-  |<--- CARD ♚ ♠ ---------------------------|
+  |<--- OK HIT CARD 7 H ---------------------|  
+  |<--- UPDATE Player Alan: 16, Dealer: 7S   |                           
+  |                                          |
+  |---- HIT -------------------------------->|
+  |<--- OK HIT CARD K S ---------------------|
+  |<--- UPDATE Player Alan: 26, Dealer: 5S   | 
   |<--- BUST --------------------------------|
   |<--- RESULT LOSE -------------------------|
   |                                          |
 ```
+
+
 

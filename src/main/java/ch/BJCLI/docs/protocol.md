@@ -16,7 +16,7 @@ COMMAND [PARAMETERS]
 ## Client → Server Commands
 
 - `JOIN <username>` : Join the game  
-- `BET <amount>` : Place a bet  
+- `BET <value>` : Place a bet  
 - `HIT` : Request a card  
 - `STAND` : End turn  
 - `LEAVE` : Leave the game  

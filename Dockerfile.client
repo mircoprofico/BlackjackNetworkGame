@@ -1,0 +1,15 @@
+# Use Eclipse Temurin JRE 21 as the base image
+FROM eclipse-temurin:21-jre
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the compiled JAR from the target folder to the container
+COPY target/BlackJack-1.0-SNAPSHOT.jar app.jar
+
+# Set the default command to run when the container starts
+# ENTRYPOINT ensures the container always runs this command
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Default argument for the ENTRYPOINT; here it will start the client
+CMD ["client"]
