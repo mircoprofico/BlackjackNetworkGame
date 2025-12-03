@@ -167,6 +167,7 @@ public class clientGUI {
                                     totalText.update("BUSTED :( ");
                                     engine.update();
                                     STAND_CALL(out, in, lastResult, moneyText, hand);
+                                    resetBetValue(bets);
                                     for(Card card : renderedCards){
                                         engine.remove(card);
                                     }
@@ -184,6 +185,7 @@ public class clientGUI {
                                         totalText.update("Total : " + total);
                                         engine.update();
                                         STAND_CALL(out, in, lastResult, moneyText, hand);
+                                        resetBetValue(bets);
                                         for(Card card : renderedCards){
                                             engine.remove(card);
                                         }
@@ -204,6 +206,7 @@ public class clientGUI {
                         case "STAND":
                             currentPanel.changeOption(-1);
                             STAND_CALL(out, in, lastResult, moneyText, hand);
+                            resetBetValue(bets);
                             for(Card card : renderedCards){
                                 engine.remove(card);
                             }
@@ -245,6 +248,7 @@ public class clientGUI {
                                     if(total==21){
                                         totalText.update("BLACK JACK !");
                                         STAND_CALL(out, in, lastResult, moneyText, hand);
+                                        resetBetValue(bets);
                                         for(Card card : renderedCards){
                                             engine.remove(card);
                                         }
@@ -299,12 +303,12 @@ public class clientGUI {
             System.out.println("[Client " + CLIENT_ID + "] exception: " + e);
         }
     }
-
+    private static void resetBetValue(RenderedText betText){betText.update("Current bet : " + 5 + " $");}
     private static void STAND_CALL(BufferedWriter out,
                                    BufferedReader in,
                                    RenderedText lastResult,
                                    RenderedText moneyText,
-                                   ArrayList<String> hand ) throws IOException
+                                   ArrayList<String> hand) throws IOException
     {
         out.write("STAND\n");
         out.flush();
