@@ -1,8 +1,8 @@
-package ui;
+package ch.BJCLI.ui;
 
 public class Card extends RenderableObject{
 
-    private Card(int width, int height, char value, char color, char[] sides) {
+    private Card(int width, int height, String value, String color, char[] sides) {
         super(0, 0, width, height);
         if(width<5 || height<5) throw new RuntimeException("The card should be at least 5x5");
         this.setWidth(width);
@@ -12,21 +12,40 @@ public class Card extends RenderableObject{
         setNumbers(image, value, color);
         setStatus(image);
     }
-    public Card(int width, int height, char value, char color) {
+    public Card(int width, int height, String value, String color) {
         this(width, height, value, color, new char[]{'│','─'});
     }
 
-    private void setNumbers(char[][] image, char value, char color){
-        image[1][1] = value;
-        image[1][2] = color;
-        if(getWidth() % 2 == 1 && getHeight() % 2 == 1){
-            image[getHeight()/2][getWidth()/2] = color;
+    private void setNumbers(char[][] image, String value, String color){
+
+        String realColor = "?";
+        switch(color){
+            case "H":
+                realColor = "♡";
+                break;
+            case "D":
+                realColor = "♢";
+                break;
+            case "C":
+                realColor = "♧";
+                break;
+            case "S":
+                realColor = "♤";
+                break;
         }
-        image[getHeight()-2][getWidth()-2] = value;
-        image[getHeight()-2][getWidth()-3] = color;
+        char[] values = (value + realColor).toCharArray();
+        int x = 1;
+        int y = 1;
 
+        for(int i = 0; i < values.length; i++){
+            image[y][x] = values[i];
+            image[getHeight()-2][getWidth()-1-x] = values[i];
+            x++;
+        }
 
-
+        if(getWidth() % 2 == 1 && getHeight() % 2 == 1){
+            image[getHeight()/2][getWidth()/2] = color.charAt(0);
+        }
     }
 
     private void setBorder(char[][] image, char[] sides){
