@@ -106,6 +106,7 @@ SERVER → CLIENT
   OK BET
   DEAL C1 C2
   OK HIT <rank> <suit>
+  UPDATE <game_state>
   BUST
   RESULT <WIN|LOSE|TIE>
   ERROR <code> <message>
@@ -127,10 +128,12 @@ CLIENT                                    SERVER
   |<--- DEAL C1 C2  -------------------------|
   |                                          |
   |---- HIT -------------------------------->|
-  |<--- OK HIT CARD 7 H ---------------------|                               
+  |<--- OK HIT CARD 7 H ---------------------|  
+  |<--- UPDATE Player Alan: 16, Dealer: 7S   |                           
   |                                          |
   |---- HIT -------------------------------->|
   |<--- OK HIT CARD K S ---------------------|
+  |<--- UPDATE Player Alan: 26, Dealer: 5S   | 
   |<--- BUST --------------------------------|
   |<--- RESULT LOSE -------------------------|
   |                                          |

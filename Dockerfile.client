@@ -1,0 +1,12 @@
+# Base image
+FROM eclipse-temurin:21-jre
+
+# Working dir
+WORKDIR /app
+
+# Copy JAR
+COPY target/BlackJack-1.0-SNAPSHOT.jar app.jar
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
+CMD ["client"]
