@@ -75,7 +75,7 @@ java -jar target/BlackJack-1.0-SNAPSHOT.jar client --host 127.0.0.1 --port 5000
 
 ### Playing Your Turn
 
-Options: **HIT** or **STAND**
+Options: **HIT**, **STAND** & **BET <VALUE>**
 
 #### HIT
 
@@ -89,6 +89,12 @@ Options: **HIT** or **STAND**
 * Wait for dealer and other players to finish.
 * Result sent: `RESULT WIN`, `RESULT LOSE`, or `RESULT PUSH`.
 
+#### BET <VALUE>
+
+* The server validates the amount and deals the opening hand.
+* If the bet is accepted → you receive two cards.
+* If you are not allowed to bet (wrong phase or insufficient funds) → server returns an error.
+
 ### Commands consol 
 
 * `JOIN <username>` – Join the game
@@ -100,32 +106,17 @@ Options: **HIT** or **STAND**
 Server responses:
 
 * `WELCOME <username>` – Confirmation of join
-* `BET_OK <amount>` – Bet accepted
-* `CARD <rank> <suit>` – Received card
+* `OK BET <value>` – Bet accepted
+* `DEAL C1 C2`
+* `OK HIT CARD <rank> <suit>` – Received card
 * `BUST` – Exceeded 21
 * `RESULT <WIN|LOSE|PUSH>` – End of turn
 * `ERROR <code> <message>` – Error message
 * `GOODBYE` – Confirmation of quit
 
 ---
+## Gameplay Overview
 
-### Example Turn (JOIN → BET → HIT → STAND)
+Here is a visual walkthrough of the game so you can see how to place a bet, request cards, and play a full round of Blackjack.
 
-```text
-CLIENT                                    SERVER
-  |                                          |
-  |---- JOIN Mirco ------------------------->|
-  |<--- WELCOME Mirco -----------------------|
-  |                                          |
-  |---- BET 50 ----------------------------->|
-  |<--- BET_OK 50 ---------------------------|
-  |                                          |
-  |---- HIT -------------------------------->|
-  |<--- CARD 7 HEARTS -----------------------|
-  |                                          |
-  |---- HIT -------------------------------->|
-  |<--- CARD KING SPADES --------------------|
-  |<--- BUST --------------------------------|
-  |<--- RESULT LOSE -------------------------|
-```
 
