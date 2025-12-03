@@ -1,6 +1,7 @@
-package client;
+package ch.BJCLI.client;
 
-import ui.*;
+import ch.BJCLI.ui.*;
+import picocli.CommandLine;
 
 import java.io.*;
 import java.net.Socket;
@@ -8,12 +9,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class clientGUI {
-    // Server configuration
-    private static final String HOST = "localhost";
-    private static final int PORT = 1234;
 
-    // Random client ID for logging purposes
+
+@CommandLine.Command(name = "client", mixinStandardHelpOptions = true, version = "1.0",
+        description = "Launch a new instance of clientGUI, will prompt for name")
+public class clientGUI implements Runnable{
+    // Server configuration
+
+    @CommandLine.Option(names = {"-h", "--host"}, description = "The server host name")
+    private String HOST = "localhost";
+
+    @CommandLine.Option(names = {"-p", "--port"}, description = "The port to connect to")
+    private int PORT = 1234;
+
+    // Random ch.BJCLI.client ID for logging purposes
     private static final int CLIENT_ID = (int) (Math.random() * 1000000);
 
     // UI constants
@@ -44,13 +53,9 @@ public class clientGUI {
         }
         return tot;
     }
-    /**
-     * Main entry point for the client application.
-     * Connects to the server and allows the user to send commands interactively.
-     *
-     * @param args command-line arguments (not used)
-     */
-    public static void main(String[] args) {
+
+    @Override
+    public void run() {
         // get player name
         Scanner sc = new Scanner(System.in);
         System.out.print("Type a username : ");
@@ -72,7 +77,7 @@ public class clientGUI {
             System.out.println(hello);
 
             /**
-             * UI : From Here, we create every ui component necessary for the graphical application.
+             * UI : From Here, we create every ch.BJCLI.ui component necessary for the graphical application.
              * The application works using a custom engine.
              */
             // Engine creation and addition of objects

@@ -1,4 +1,4 @@
-package server;
+package ch.BJCLI.server;
 
 import java.io.*;
 import java.net.Socket;
@@ -6,12 +6,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
- * Handles a single player's connection to the server.
+ * Handles a single player's connection to the ch.BJCLI.server.
  * Each instance runs in its own thread.
  */
 public class PlayerConnection implements Runnable {
-    private final Socket socket;   // Socket associated with the connected client
-    private final Server server;   // Reference to the main server instance
+    private final Socket socket;   // Socket associated with the connected ch.BJCLI.client
+    private final Server server;   // Reference to the main ch.BJCLI.server instance
     private final GameManager gameManager;
     private String name;
     private final ArrayList<String> hand = new ArrayList<>();
@@ -19,8 +19,8 @@ public class PlayerConnection implements Runnable {
     /**
      * Constructor for a new player connection.
      *
-     * @param clientSocket the socket representing the client connection
-     * @param server       reference to the main server
+     * @param clientSocket the socket representing the ch.BJCLI.client connection
+     * @param server       reference to the main ch.BJCLI.server
      */
     public PlayerConnection(Socket clientSocket, Server server, GameManager gameManager) {
         this.socket = clientSocket;
@@ -29,8 +29,8 @@ public class PlayerConnection implements Runnable {
     }
 
     /**
-     * Main thread execution for handling client commands.
-     * Reads input commands from the client, processes them, and sends responses.
+     * ch.BJCLI.Main thread execution for handling ch.BJCLI.client commands.
+     * Reads input commands from the ch.BJCLI.client, processes them, and sends responses.
      */
     @Override
     public void run() {
@@ -39,7 +39,7 @@ public class PlayerConnection implements Runnable {
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
              BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8))) {
 
-            System.out.println("[Server " + server.getServerId() + "] new client connected from "
+            System.out.println("[Server " + server.getServerId() + "] new ch.BJCLI.client connected from "
                     + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
 
             out.write("[Server] " + server.getTextualData() + "\n");
@@ -63,7 +63,7 @@ public class PlayerConnection implements Runnable {
              * ************ GAME LOOP ****************
              *
              */
-            // Read commands sent by the client in a loop
+            // Read commands sent by the ch.BJCLI.client in a loop
             String line;
             while ((line = in.readLine()) != null) {
                 // Split the command into action and optional argument
@@ -150,7 +150,7 @@ public class PlayerConnection implements Runnable {
             System.out.println("[Server " + server.getServerId() + "] closing connection");
 
         } catch (IOException e) {
-            // Handle exceptions such as client disconnects or I/O errors
+            // Handle exceptions such as ch.BJCLI.client disconnects or I/O errors
             System.err.println("[Server " + server.getServerId() + "] exception: " + e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

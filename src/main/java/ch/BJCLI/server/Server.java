@@ -1,27 +1,29 @@
-package server;
+package ch.BJCLI.server;
+
+import picocli.CommandLine;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-/**
- * Main server class for the Blackjack network game.
- * Listens for incoming client connections and starts a PlayerConnection thread for each client.
- */
-public class Server {
 
-    private static final int PORT = 1234; // Port number where the server will listen for connections
-    private static final int SERVER_ID = (int) (Math.random() * 1000000); // Random server ID used for logging purposes
+@CommandLine.Command(name = "server", mixinStandardHelpOptions = true, version = "1.0",
+        description = "Launch a new instance of a Server, will print any interactions with players")
+public class Server implements Runnable {
+
+    @CommandLine.Option(names = {"-p", "--port"}, description = "The port to connect to")
+    private int PORT = 1234; // Port number where the ch.BJCLI.server will listen for connections
+    private static final int SERVER_ID = (int) (Math.random() * 1000000); // Random ch.BJCLI.server ID used for logging purposes
     private final GameManager gameManager = new GameManager();
     // Textual data to send to clients (can be used for testing or welcome message)
     private static final String TEXTUAL_DATA = "👋 from Croupier " + SERVER_ID;
 
     public final int BASE_MONEY = 50;
     /**
-     * Getter for the server ID.
+     * Getter for the ch.BJCLI.server ID.
      * Used by PlayerConnection for logging.
      *
-     * @return the server ID
+     * @return the ch.BJCLI.server ID
      */
     public int getServerId() { return SERVER_ID; }
 
@@ -34,35 +36,29 @@ public class Server {
     public String getTextualData() { return TEXTUAL_DATA; }
 
     /**
-     * Starts the server: listens for client connections and handles each connection in a separate thread.
+     * Starts the ch.BJCLI.server: listens for ch.BJCLI.client connections and handles each connection in a separate thread.
      */
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
 
             System.out.println("[Server " + SERVER_ID + "] starting with id " + SERVER_ID + " listening on port " + PORT);
 
-            // Main loop: accept clients indefinitely
+            // ch.BJCLI.Main loop: accept clients indefinitely
             while (true) {
-                Socket clientSocket = serverSocket.accept(); // blocks until a client connects
-                System.out.println("[Server " + SERVER_ID + "] new client connected: " +
+                Socket clientSocket = serverSocket.accept(); // blocks until a ch.BJCLI.client connects
+                System.out.println("[Server " + SERVER_ID + "] new ch.BJCLI.client connected: " +
                         clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
 
-                // Start a new thread to handle this client
+                // Start a new thread to handle this ch.BJCLI.client
                 new Thread(new PlayerConnection(clientSocket, this, gameManager)).start();
             }
 
         } catch (IOException e) {
-            // Handle server socket errors
+            // Handle ch.BJCLI.server socket errors
             System.out.println("[Server " + SERVER_ID + "] exception: " + e);
         }
     }
 
-    /**
-     * Main entry point for the server program.
-     *
-     * @param args command-line arguments (not used)
-     */
-    public static void main(String[] args) {
-        new Server().start();
-    }
+    @Override
+    public void run() {new Server().start();}
 }

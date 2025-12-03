@@ -1,4 +1,4 @@
-package ui;
+package ch.BJCLI.ui;
 
 import java.io.IOException;
 

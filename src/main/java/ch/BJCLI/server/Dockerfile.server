@@ -9,4 +9,5 @@ RUN mvn package -DskipTests
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
 COPY --from=build /app/target/classes ./classes
-CMD ["java", "-cp", "./classes", "client.Client"]
+EXPOSE 1234
+CMD ["java", "-cp", "./classes", "ch.BJCLI.server.Server"]
